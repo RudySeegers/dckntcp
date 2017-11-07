@@ -115,6 +115,13 @@ def console(request, arkwalletmain):
         payout_result = []
         share_percentage = 'Not available'
 
+
+        try:
+            votepoolobject = ark_delegate_manager.models.VotePool.objects.get(ark_address=wallet)
+            builduppayout = votepoolobject.payout_amount
+        except Exception:
+            builduppayout = None
+
         # calculate total staking reward and build data for graph
         # modify the payouts to include share percentages:
 
@@ -171,7 +178,8 @@ def console(request, arkwalletmain):
             'total_reward': 'Ѧ' + str(total_reward/arkinfo.ARK),
             'height': height,
             'info': None,
-            'status': status
+            'status': status,
+            'builduppayout': builduppayout
             })
     except Exception:
         pass
