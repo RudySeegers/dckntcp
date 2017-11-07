@@ -163,7 +163,7 @@ LOGGING = {
     'version': 1,
     'disable_existing_loggers': True,
     'root': {
-        'level': 'WARNING',
+        'level': 'DEBUG',
         'handlers': ['sentry'],
     },
     'formatters': {
@@ -174,7 +174,7 @@ LOGGING = {
     },
     'handlers': {
         'sentry': {
-            'level': 'ERROR', # To capture more than ERROR, change to WARNING, INFO, etc.
+            'level': 'DEBUG',
             'class': 'raven.contrib.django.raven_compat.handlers.SentryHandler',
             'tags': {'custom-tag': 'x'},
         },
@@ -186,24 +186,24 @@ LOGGING = {
     },
     'loggers': {
         'django.db.backends': {
-            'level': 'ERROR',
+            'level': 'DEBUG',
             'handlers': ['console'],
             'propagate': False,
         },
         'raven': {
             'level': 'DEBUG',
             'handlers': ['console'],
-            'propagate': False,
+            'propagate': True,
         },
         'sentry.errors': {
             'level': 'DEBUG',
             'handlers': ['console'],
-            'propagate': False,
+            'propagate': True,
         },
     'ark_delegate_manager': {
-            'level': 'ERROR',
+            'level': 'DEBUG',
             'handlers': ['sentry'],
-            'propagate': False
+            'propagate': True
         },
     },
 }
