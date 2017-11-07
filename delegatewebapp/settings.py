@@ -209,9 +209,9 @@ LOGGING = {
 }
 
 CRON_CLASSES = [
-    "dutchdelegatewebapp.ark_delegate_manager.cron.UpdateVotePool",
-    "dutchdelegatewebapp.ark_delegate_manager.cron.RunPayments",
-    "dutchdelegatewebapp.ark_delegate_manager.cron.VerifyReceivingArkAddresses",
-    "dutchdelegatewebapp.ark_delegate_manager.cron.UpdateDutchDelegateStatus",
+    "ark_delegate_manager.cron_jobs.UpdateVotePool",
+    "ark_delegate_manager.cron_jobs.RunPayments",
+    "ark_delegate_manager.cron_jobs.VerifyReceivingArkAddresses",
+    "ark_delegate_manager.cron_jobs.UpdateDutchDelegateStatus",
 
 ]
