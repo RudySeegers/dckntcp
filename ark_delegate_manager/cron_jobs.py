@@ -37,8 +37,7 @@ class UpdateVotePool(CronJobBase):
 
         if not ark_node.Node.check_node(51):
             logger.fatal('Node is more than 51 blocks behind')
-            raise ark_node.NodeDbError('Node is more than 51 blocks behind')
-
+            return
         payouts, timestamp = ark_node.Delegate.trueshare()
 
         for address in payouts:
@@ -57,7 +56,7 @@ class RunPayments(CronJobBase):
 
         if not ark_node.Node.check_node(51):
             logger.fatal('Node is more than 51 blocks behind')
-            raise ark_node.NodeDbError('Node is more than 51 blocks behind')
+            return
 
         payouts, timestamp = ark_node.Delegate.trueshare()
         logger.info('starting payment run at arktimestamp: {}'.format(timestamp))
@@ -74,6 +73,11 @@ class VerifyReceivingArkAddresses(CronJobBase):
 
     def do(self):
         logger.info('starting verification update round. CODE: {}'.format('ark_delegate_manager.verify_receiving_ark_addresses'))
+
+        if not ark_node.Node.check_node(51):
+            logger.fatal('Node is more than 51 blocks behind')
+            return
+
         payout_functions.verify_address_run()
 
 

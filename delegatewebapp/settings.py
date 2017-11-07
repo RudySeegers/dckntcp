@@ -213,5 +213,4 @@ CRON_CLASSES = [
     "ark_delegate_manager.cron_jobs.RunPayments",
     "ark_delegate_manager.cron_jobs.VerifyReceivingArkAddresses",
     "ark_delegate_manager.cron_jobs.UpdateDutchDelegateStatus",
-
 ]
