@@ -88,9 +88,9 @@ def console(request, arkwalletmain):
             except Exception:
                 pass
         else:
-            wallet = current_user.user.receiving_ark_address_tag
+            wallet = current_user.user.receiving_ark_address
             try:
-                wallettag = current_user.user.arkwallet2
+                wallettag = current_user.user.receiving_ark_address_tag
             except Exception:
                 pass
 
