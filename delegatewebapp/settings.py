@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     'django_extensions',
     'widget_tweaks',
     'django_cron',
+
     # my apps
     'home',
     'console',
@@ -208,9 +209,9 @@ LOGGING = {
 }
 
 CRON_CLASSES = [
-    "ark_delegate_manager.cron.UpdateVotePool",
-    "ark_delegate_manager.cron.RunPayments",
-    "ark_delegate_manager.cron.VerifyReceivingArkAddresses",
-    "ark_delegate_manager.cron.UpdateDutchDelegateStatus",
+    "dutchdelegatewebapp.ark_delegate_manager.cron.UpdateVotePool",
+    "dutchdelegatewebapp.ark_delegate_manager.cron.RunPayments",
+    "dutchdelegatewebapp.ark_delegate_manager.cron.VerifyReceivingArkAddresses",
+    "dutchdelegatewebapp.ark_delegate_manager.cron.UpdateDutchDelegateStatus",
 
 ]
