@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     'django_extensions',
     'widget_tweaks',
+    'django_cron'
     # my apps
     'home',
     'console',
