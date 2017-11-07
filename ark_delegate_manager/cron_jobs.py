@@ -17,7 +17,7 @@ from . import models
 
 
 class UpdateVotePool(CronJobBase):
-    RUN_EVERY_MINS = 20
+    RUN_EVERY_MINS = 30
     schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
     code = 'ark_delegate_manager.update_vote_pool'
 
@@ -47,12 +47,12 @@ class UpdateVotePool(CronJobBase):
 
 
 class RunPayments(CronJobBase):
-    RUN_EVERY_MINS = 2
+    RUN_EVERY_MINS = 120
     schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
     code = 'ark_delegate_manager.update_vote_pool'
 
     def do(self):
-        logger.info('starting payment run')
+        logger.critical('starting payment run')
 
         if not ark_node.Node.check_node(51):
             logger.fatal('Node is more than 51 blocks behind')
