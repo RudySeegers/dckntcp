@@ -139,7 +139,7 @@ def console(request, arkwalletmain):
                     if vote_timestamp < 16247647 or tx.recipientId in info.EXCEPTIONS:
                         share_percentage = 0.96
             try:
-                share_percentage = str(int(100*share_percentage)), '%'
+                share_percentage = str(int(100*share_percentage)) + '%'
             except Exception:
                 pass
             payout_result.append(
@@ -160,7 +160,6 @@ def console(request, arkwalletmain):
         data = SimpleDataSource(data=data_list)
         chart = LineChart(data, options={'title': 'Payout History'})
 
-        print(wallettag)
         context.update({
             'wallettag': wallettag,
             'current_delegate': delegate,
