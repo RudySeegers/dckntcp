@@ -207,8 +207,9 @@ LOGGING = {
 }
 
 CRON_CLASSES = [
-    'ark_delegate_manager.cron.TestCronJob',
-]
+    "ark_delegate_manager.cron.UpdateVotePool",
+    "ark_delegate_manager.cron.RunPayments",
+    "ark_delegate_manager.cron.VerifyReceivingArkAddresses",
+    "ark_delegate_manager.cron.UpdateDutchDelegateStatus",
 
-if not DEBUG:
-    CRON_CLASSES.remove('ark_delegate_manager.cron.TestCronJob')
+]
