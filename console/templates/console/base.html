@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="dutchdelegate webapp, for setting your payout frequency and more">
+    <meta name="author" content="Charles">
+    <title>Dutchdelegate</title>
+
+
+{% load static %}
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.7/paper/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+
+    <script>$(document).ready(function () {
+  $('a[data-class]').click(function () {
+    updateNavbarClass($(this).attr('data-class'));
+  });
+
+  updateNavbarClass('navbar-fixed-left');
+
+});
+
+function updateNavbarClass(className) {
+  $('nav')
+    .removeClass(function (index, css) {
+      return (css.match(/(^|\s)navbar-fixed-\S+/g) || []).join(' ');
+    })
+    .addClass(className);
+
+  $('a[data-class]').removeClass('active').parent('li').removeClass('active');
+  $('a[data-class="'+className+'"]').addClass('active').parent('li').addClass('active');
+
+  fixBodyPadding(className);
+
+}
+
+function fixBodyPadding(className) {
+  if (/navbar-fixed-(left|right)/.test(className)) {
+    $('body').removeAttr('style');
+    if (className === 'navbar-fixed-right') {
+      $('body').css('paddingLeft', 0);
+    } else {
+      $('body').css('paddingRight', 0);
+    }
+  } else {
+    $('body').css({
+      "padding-right": 0,
+      "padding-left": 0,
+      "padding-top": '70px'
+    });
+  }
+}</script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.7/paper/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+  <link rel="stylesheet" href="{% static 'home/css/dashboard.css'%} ">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+</head>
+
+<body>
+
+  <nav class="navbar navbar-inverse navbar-fixed-left">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <p class="navbar-brand">{{ request.user.username }}</p>
+      </div>
+      <div id="navbar" class="navbar-collapse collapse">
+        <ul class="nav navbar-nav">
+          <li><a href="{% url 'index' %}" style="font-size: 350%" >Home</a></li>
+          <li class="dropdown" style="border-top: 1px solid white">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="font-size: 300%">ARK</a>
+            <ul class="dropdown-menu">
+            {% if arkwallet1 %}
+                <li><a href="{% url 'console_arkwalletmain'%}"> {{arkwallet1}} </a></li>
+            {% endif %}
+            {% if arkwallet2 %}
+                <li><a href="{% url 'console_arkwalletreceive'%}"> {{arkwallet2}} </a></li>
+            {% endif %}
+
+                <li role="separator" class="divider"></li>
+                <li class="dropdown-header"></li>
+                <li><a href="{% url 'console_update' %}">
+                 {% if not arkwallet1 %}
+                    add wallet
+                       {% else %}
+                    configure wallets
+                 {% endif %}
+                       </a></li>
+
+            </ul>
+            </li>
+            <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="font-size: 300%">Kapu</a>
+            <ul class="dropdown-menu">
+                {% for wallet in kapuwallets %}
+                <li><a href="#">{{ wallet }}</a></li>
+                {% endfor %}
+                <li role="separator" class="divider"></li>
+                <li class="dropdown-header"></li>
+                <li><a href="{% url 'console_update' %}">{% if not kapuwallets %}
+                    add wallet
+                       {% else %}
+                    configure wallets
+                 {% endif %}
+                       </a></li>
+            </ul>
+          </li>
+            <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="font-size: 300%">Oxycoin</a>
+            <ul class="dropdown-menu">
+              {% for wallet in oxywallets %}
+                <li><a href="#">{{ wallet }}</a></li>
+                {% endfor %}
+                <li role="separator" class="divider"></li>
+                <li class="dropdown-header"></li>
+                <li><a href="{% url 'console_update' %}">{% if not oxywallets %}
+                    add wallet
+                       {% else %}
+                    configure wallets
+                 {% endif %}
+                       </a></li>
+            </ul>
+          </li>
+            <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="font-size: 300%">Shift</a>
+            <ul class="dropdown-menu">
+              {% for wallet in shiftwallets %}
+                <li><a href="#">{{ wallet }}</a></li>
+              {% endfor %}
+                <li role="separator" class="divider"></li>
+                <li class="dropdown-header"></li>
+                <li><a href="{% url 'console_update' %}">{% if not shiftwallets %}
+                    add wallet
+                       {% else %}
+                    configure wallets
+                 {% endif %}
+                       </a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  {% block content %}
+  {% endblock %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script type="text/javascript" src="{% static '/home/js/bootstrap.min.js' %}"></script>
+    <script type="text/javascript" src={% static '/home/js/bootstrap.min.js' %}></script>
+    <link rel="stylesheet" type="text/css" href="{% static '/css/bootstrap.min.css'%}">
+    <link rel="stylesheet" type="text/css" href="{% static '/css/bootstrap-responsive.min.css"' %}">
+    <script src="{% static '/home/js/bootstrap.min.js' %}"></script>
+    <script src="{% static '/home/jquery/jquery.min.js' %}"></script>
+    <script src="{% static '/home/popper/popper.min.js' %}"></script>
+  </body>
+</html>
+
+

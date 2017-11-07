@@ -1,0 +1,25 @@
+{% extends 'home/popup_header.html' %}
+{% load crispy_forms_tags %}
+
+{%  block content %}
+
+<h1></h1>
+
+
+<div align="center">
+<form method="POST" action="">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+<div class="btn-group-vertical" role="group" aria-label="...">
+    <ul style="list-style: none;">
+    <li><p><input class='btn btn-primary btn-sm left' type='submit' value='Sign In' /></p></li>
+   <li><p><a class="btn btn-primary btn-sm pull-right" href="/signup/" role="button" >Register</a></p></li>
+    <li><p><a class="btn btn-primary btn-sm pull-right" href="/password_reset/" role="button" >Reset Password</a></p></li>
+</ul>
+    </div>
+
+
+</form>
+</div>
+{% endblock %}
