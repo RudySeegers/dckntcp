@@ -18,8 +18,6 @@ class UserProfile(models.Model):
     receiving_ark_address_verified = models.BooleanField(default=False)
     receiving_ark_address_tag = models.CharField(max_length=34, blank=True, null=True)
 
-
-
     payout_frequency = models.IntegerField(choices=PAYOUT_CHOICES, default=2)
 
 
