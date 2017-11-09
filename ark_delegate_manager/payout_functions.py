@@ -8,6 +8,7 @@ from django.conf import settings
 from . import config
 import console.models
 import hashlib
+import arkdbtools.utils as utils
 logger = logging.getLogger(__name__)
 
 
@@ -151,13 +152,11 @@ def update_arknode():
         for i in range(5):
             try:
                 arky.api.use('ark')
-                dutchdelegatestatus = arky.api.Delegate.getDelegate('dutchdelegate')
+                dutchdelegatestatus = utils.api_call(arky.api.Delegate.getDelegate, 'dutchdelegate')
                 dutchdelegate_ark_rank = dutchdelegatestatus['delegate']['rate']
                 dutchdelegate_ark_productivity = dutchdelegatestatus['delegate']['productivity']
                 dutchdelegate_total_ark_voted = int(dutchdelegatestatus['delegate']['vote']) / info.ARK
                 voters = len(ark_node.Delegate.voters())
-                if dutchdelegatestatus['success']:
-                    break
             except Exception:
                 pass
         if not dutchdelegatestatus['success']:

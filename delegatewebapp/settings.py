@@ -60,8 +60,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     'django_extensions',
     'widget_tweaks',
-    # 'django_cron',
-    'kronos',
+    'django_cron',
 
     # my apps
     'home',
@@ -215,5 +214,3 @@ CRON_CLASSES = [
     "ark_delegate_manager.cron_jobs.VerifyReceivingArkAddresses",
     "ark_delegate_manager.cron_jobs.UpdateDutchDelegateStatus",
 ]
-
-KRONOS_PREFIX = config('KRONOSPREFIX')
