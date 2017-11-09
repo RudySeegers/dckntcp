@@ -59,40 +59,37 @@ def paymentrun(payout_dict, current_timestamp):
             #send_to_second is not a bool, because the widget for an integerfield is much prettier
             if verified and send_to_second == 1:
                 send_destination = receiving_address
-                res = send_tx(address=voter, amount=1, vendor_field='|DD-admin| sent payout to: '.format(send_destination))
-                if not res:
-                    continue
-
         except Exception:
             pass
         if payout_dict[voter]['vote_timestamp'] < constants.CUT_OFF_EARLY_ADOPTER or \
-                        voter in constants.PAYOUT_EXCEPTIONS:
+        voter in constants.PAYOUT_EXCEPTIONS:
             share_percentage = 0.96
 
         amount = payout_dict[voter]['share'] * share_percentage
 
         if frequency == 1 and payout_dict[voter]['last_payout'] < current_timestamp - constants.DAY:
             if amount > constants.MIN_AMOUNT_DAILY:
+                admin_res = send_tx(address=voter, amount=1,
+                                    vendor_field='|DD-admin| sent payout to: '.format(send_destination))
                 res = send_tx(address=send_destination, amount=amount)
                 if res and verified:
-                    admin_res = send_tx(address=voter, amount=1,
-                                        vendor_field='|DD-admin| sent payout to: '.format(send_destination))
+
                     if not admin_res:
                         logger.fatal('failed to send administrative token to {}'.format(voter))
         if frequency == 2 and payout_dict[voter]['last_payout'] < current_timestamp - constants.WEEK:
             if amount > constants.MIN_AMOUNT_WEEKY:
+                admin_res = send_tx(address=voter, amount=1,
+                                    vendor_field='|DD-admin| sent payout to: '.format(send_destination))
                 res = send_tx(address=send_destination, amount=amount)
                 if res and verified:
-                    admin_res = send_tx(address=voter, amount=1,
-                                        vendor_field='|DD-admin| sent payout to: '.format(send_destination))
                     if not admin_res:
                         logger.fatal('failed to send administrative token to {}'.format(voter))
         if frequency == 3 and payout_dict[voter]['last_payout'] < current_timestamp - constants.MONTH:
             if amount > constants.MIN_AMOUNT_MONTHLY:
+                admin_res = send_tx(address=voter, amount=1,
+                                    vendor_field='|DD-admin| sent payout to: '.format(send_destination))
                 res = send_tx(address=send_destination, amount=amount)
                 if res and verified:
-                    admin_res = send_tx(address=voter, amount=1,
-                                        vendor_field='|DD-admin| sent payout to: '.format(send_destination))
                     if not admin_res:
                         logger.fatal('failed to send administrative token to {}'.format(voter))
     return True

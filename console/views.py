@@ -9,12 +9,15 @@ from django.core.exceptions import PermissionDenied
 from graphos.renderers.gchart import LineChart
 from graphos.sources.simple import SimpleDataSource
 import datetime
-import hashlib
+import logging
 from . import info
 from delegatewebapp.tokens import gen_ark_token, gen_kapu_token
 from . import config
 import arkdbtools.dbtools as arktool
 import arkdbtools.config as arkinfo
+
+
+logger = logging.getLogger(__name__)
 
 def saved(request):
     return render(request, 'console/saved.html')
@@ -115,11 +118,12 @@ def console(request, arkwalletmain):
         payout_result = []
         share_percentage = 'Not available'
 
-
         try:
+            logger.info('requesting votepool object for {}'.format(wallet))
             votepoolobject = ark_delegate_manager.models.VotePool.objects.get(ark_address=wallet)
             builduppayout = votepoolobject.payout_amount
         except Exception:
+            logger.warning(('could not get votepoolobject or builduppayout for {}'.format(wallet)))
             builduppayout = None
 
         # calculate total staking reward and build data for graph
