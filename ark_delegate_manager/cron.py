@@ -110,3 +110,4 @@ class UpdateDelegates(CronJobBase):
             delegate_obj.productivity = delegate['productivity']
             delegate_obj.rank = delegate['rate']
             delegate_obj.voters = len(ark_node.Delegate.voters(delegate['address']) + 1)
+            delegate_obj.save()
