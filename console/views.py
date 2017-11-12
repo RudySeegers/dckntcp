@@ -15,7 +15,7 @@ from delegatewebapp.tokens import gen_ark_token, gen_kapu_token
 from . import config
 import arkdbtools.dbtools as arktool
 import arkdbtools.config as arkinfo
-
+from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +24,7 @@ def sidebar_context(request):
     current_user = User.objects.get(username=request.user.username)
     try:
         arkmainwallet = current_user.user.main_ark_wallet
-    except current_user.user.RelatedObjectDoesNotExist:
+    except ObjectDoesNotExist:
         return edit_user(request)
 
     arkreceivemain = current_user.user.receiving_ark_address
