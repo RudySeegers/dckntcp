@@ -1,0 +1,91 @@
+{%  extends 'console/consolebase.html' %}
+{% load static %}
+
+{% block labelbar %}
+<div>
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="">Payout Report</a></li>
+        <li><a href="">Balance Report</a></li>
+        <li class="dropdown">
+        <a class="dropdown-toggle" data-toggle="dropdown" href="#">Analytics
+        <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+          <li><a href="#">Delegates Report</a></li>
+          <li><a href="#">Ark Distribution</a></li>
+          <li><a href="#">Exchange Report</a></li>
+        </ul>
+        </li>
+    </ul>
+</div>
+{% endblock labelbar %}
+
+{% block content %}
+    <link rel="stylesheet" href="{% static 'home/css/consolecustom.css'%} ">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-sm-9 col-sm col-md-10 col-md main">
+              <div class="row ">
+                <div class="col col-sm-7 ">
+                    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+                    <script type="text/javascript">
+                        google.load("visualization", "1", {packages:["corechart"]});
+
+                    </script>
+
+                    {{ chart.as_html }}
+
+                <div class="card card-block" style="width: 50rem;">
+                    <h3 class="card-title">
+                        {% if wallettag %}
+                            {{ wallettag }}
+                        {% else  %}
+                            {{ wallet }}
+                        {% endif %}
+                    </h3>
+                    <ul style="list-style: none;">
+                    {% if wallettag %}
+                    <li><span class="text-muted">{{ wallet }}</span></li>
+                    {% endif %}
+                    <li><span class="text-muted">Balance: {{ balance }}</span></li>
+                    <li><span class="text-muted">Built up payout: {{ builduppayout }}</span></li>
+                    <li><span class="text-muted">Total staking reward: {{ total_reward }}</span></li>
+                    {% if status %}
+                    <li><span class="text-muted">Status: {{ status }}</span></li>
+                    {% endif %}
+                    <li><span class="text-muted">Delegate: {{ current_delegate }}</span></li>
+                    <li><span class="text-muted">Blockheight: {{ height }}</span></li>
+                    </ul>
+                    <a href="https://explorer.ark.io/address/{{ wallet }}" class="btn btn-primary">Explorer</a>
+                </div>
+              </div>
+                 {% if not info %}
+              <div class="table-responsive container">
+                <table class="table table-fill">
+                  <thead>
+                    <tr>
+                      <th>Amount</th>
+                      <th>Date (UTC)</th>
+                      <th>Share percentage</th>
+                      <th>Delegate</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                        {% for tx in tx_history %}
+                     <tr>
+                        <td>Ѧ{{ tx.amount }}</td>
+                        <td>{{ tx.time }}</td>
+                        <td>{{ tx.share }}</td>
+                        <td>{{ tx.delegate }}</td>
+                     </tr>
+                        {% endfor %}
+                    {% else %}
+
+                    {% endif %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+{% endblock %}

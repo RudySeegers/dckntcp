@@ -1,0 +1,55 @@
+{%  extends 'console/consolebase.html' %}
+{% load static %}
+
+{% block content %}
+    <link rel="stylesheet" href="{% static 'home/css/console_1.css'%} ">
+<div>&nbsp;</div>
+<div>&nbsp;</div>
+<div>&nbsp;</div>
+<div class="container">
+        <div class="row">
+            <div class="col-sm-6 col-md-4 col-lg-3 mt-4">
+                <div class="card">
+                    <img class="card-img-top" src="{% static 'favicon.png' %}">
+                    <div class="card-block">
+                        <h4 class="card-title">Dutchdelegate</h4>
+                        <div class="meta">
+                            <a href="#">ARK</a>
+                        </div>
+                        <div class="card-text">
+                            <ul style="list-style: none;">
+                                <li>Rank: {{ dutchdelegaterank }}</li>
+                                <li>Votes: {{ totalarkvoted }}</li>
+                                <li>Productivity: {{ productivity }}</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <span class="float-right">ACTIVE</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-4 col-lg-3 mt-4">
+                <div class="card">
+                    <img class="card-img-top" src="{% static 'home/img/inprogress.png' %}">
+                    <div class="card-block">
+                        <h4 class="card-title">Antonie</h4>
+                        <div class="meta">
+                            <a href="#">Kapu</a>
+                        </div>
+                        <div class="card-text">
+                            <ul style="list-style: none;">
+                                <li>Rank: None</li>
+                                <li>Votes: 0</li>
+                                <li>Productivity: None</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <span class="float-right">IN DEVELOPMENT</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+</div>
+{% endblock content %}

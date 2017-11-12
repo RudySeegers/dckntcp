@@ -12,13 +12,13 @@ class AccountActivationTokenGenerator(PasswordResetTokenGenerator):
 account_activation_token = AccountActivationTokenGenerator()
 
 
-def gen_ark_token(user, address):
-    rawtoken = settings.VERIFICATION_KEY + str(user) + str(address) + 'ark'
+def gen_ark_token(user):
+    rawtoken = settings.VERIFICATION_KEY + str(user) + 'ark'
     return hashlib.sha256(rawtoken.encode()).hexdigest()
 
 
-def gen_kapu_token(user, address):
-    rawtoken = settings.VERIFICATION_KEY + str(user) + str(address) + 'kapu'
+def gen_kapu_token(user):
+    rawtoken = settings.VERIFICATION_KEY + str(user) + 'kapu'
     return hashlib.sha256(rawtoken.encode()).hexdigest()
 
 

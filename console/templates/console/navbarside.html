@@ -1,0 +1,92 @@
+{% extends 'console/consolebase.html' %}
+{% block navbar %}
+<nav class="navbar navbar-inverse navbar-fixed-left">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <p class="navbar-brand">{{ request.user.username }}</p>
+      </div>
+      <div id="navbar" class="navbar-collapse collapse">
+        <ul class="nav navbar-nav">
+          <li><a href="{% url 'index' %}" style="font-size: 350%" >Home</a></li>
+          <li><a href="{% url 'console_first' %}" style="font-size: 350%" >Nodes</a></li>
+          <li class="dropdown" style="border-top: 1px solid white">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="font-size: 300%">ARK</a>
+            <ul class="dropdown-menu">
+            {% if arkwallet1 %}
+                <li><a href="{% url 'console_arkwalletmain'%}"> {{arkwallet1}} </a></li>
+            {% endif %}
+            {% if arkwallet2 %}
+                <li><a href="{% url 'console_arkwalletreceive'%}"> {{arkwallet2}} </a></li>
+            {% endif %}
+
+                <li role="separator" class="divider"></li>
+                <li class="dropdown-header"></li>
+                <li><a href="{% url 'console_update' %}">
+                 {% if not arkwallet1 %}
+                    add wallet
+                       {% else %}
+                    configure wallets
+                 {% endif %}
+                       </a></li>
+
+            </ul>
+            </li>
+            <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="font-size: 300%">Kapu</a>
+            <ul class="dropdown-menu">
+                {% for wallet in kapuwallets %}
+                <li><a href="#">{{ wallet }}</a></li>
+                {% endfor %}
+                <li role="separator" class="divider"></li>
+                <li class="dropdown-header"></li>
+                <li><a href="{% url 'console_update' %}">{% if not kapuwallets %}
+                    add wallet
+                       {% else %}
+                    configure wallets
+                 {% endif %}
+                       </a></li>
+            </ul>
+          </li>
+            <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="font-size: 300%">Oxycoin</a>
+            <ul class="dropdown-menu">
+              {% for wallet in oxywallets %}
+                <li><a href="#">{{ wallet }}</a></li>
+                {% endfor %}
+                <li role="separator" class="divider"></li>
+                <li class="dropdown-header"></li>
+                <li><a href="{% url 'console_update' %}">{% if not oxywallets %}
+                    add wallet
+                       {% else %}
+                    configure wallets
+                 {% endif %}
+                       </a></li>
+            </ul>
+          </li>
+            <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="font-size: 300%">Shift</a>
+            <ul class="dropdown-menu">
+              {% for wallet in shiftwallets %}
+                <li><a href="#">{{ wallet }}</a></li>
+              {% endfor %}
+                <li role="separator" class="divider"></li>
+                <li class="dropdown-header"></li>
+                <li><a href="{% url 'console_update' %}">{% if not shiftwallets %}
+                    add wallet
+                       {% else %}
+                    configure wallets
+                 {% endif %}
+                       </a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+{% endblock %}

@@ -1,4 +1,4 @@
-{% extends "graphos/gchart/base.html" %}
+{% extends "graphos/gchart/consolebase.html" %}
 
 {% block create_chart %}
   var chart = new google.visualization.LineChart(document.getElementById('{{ chart.get_html_id }}'));

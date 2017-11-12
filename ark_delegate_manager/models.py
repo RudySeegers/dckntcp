@@ -19,3 +19,5 @@ class DutchDelegateStatus(models.Model):
     ark_votes = models.FloatField(default=0)
     voters = models.IntegerField(default=0)
     productivity = models.FloatField(default=100)
+
+

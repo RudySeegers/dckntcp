@@ -1,23 +1,9 @@
-{%  extends 'console/base.html' %}
+{%  extends 'console/consolebase.html' %}
+{% load static %}
+
 
 {% block content %}
-{% load static %}
     <link rel="stylesheet" href="{% static 'home/css/consolecustom.css'%} ">
-      <body>
-        <ul class="nav nav-tabs">
-            <li class="active"><a href="#">Home</a></li>
-            <li class="dropdown">
-        <a class="dropdown-toggle" data-toggle="dropdown" href="#">Menu 1
-        <span class="caret"></span></a>
-        <ul class="dropdown-menu">
-          <li><a href="#">Submenu 1-1</a></li>
-          <li><a href="#">Submenu 1-2</a></li>
-          <li><a href="#">Submenu 1-3</a></li>
-        </ul>
-            </li>
-            <li><a href="#">Menu 2</a></li>
-            <li><a href="#">Menu 3</a></li>
-        </ul>
         <div class="container-fluid">
           <div class="row">
             <div class="col-sm-9 col-sm col-md-10 col-md main">
@@ -44,9 +30,7 @@
                     <li><span class="text-muted">{{ wallet }}</span></li>
                     {% endif %}
                     <li><span class="text-muted">Balance: {{ balance }}</span></li>
-                    {% if builduppayout %}
                     <li><span class="text-muted">Built up payout: {{ builduppayout }}</span></li>
-                    {% endif %}
                     <li><span class="text-muted">Total staking reward: {{ total_reward }}</span></li>
                     {% if status %}
                     <li><span class="text-muted">Status: {{ status }}</span></li>

@@ -1,0 +1,138 @@
+{%  extends 'home/popup_header.html' %}
+{% load crispy_forms_tags %}
+{% load widget_tweaks %}
+{% block content %}
+{% load static %}
+<link rel="stylesheet" href="{% static '/home/css/custom.css' %}">
+<script>$('#sidebar').affix({
+      offset: {
+        top: $('header').height()
+      }
+});
+</script>
+
+<script>
+$('.scroll').click(function() {
+    $('body').animate({
+        scrollTop: eval($('#' + $(this).attr('target')).offset().top - 70)
+    }, 1000);
+});
+</script>
+<script>
+// When the user clicks on <div>, open the popup
+function myFunction() {
+    var popup = document.getElementById("myPopup");
+    popup.classList.toggle("show");
+}
+</script>
+
+<div>
+&nbsp;
+</div>
+
+<div class="container">
+    <div class="row">
+    	<div class="col-md-3">
+            <div class="list-group" id="sidebar" style="position: fixed">
+            	<a href="#ark" class="list-group-item scroll">ARK</a>
+                <a href="#kapu" class="list-group-item scroll">Kapu</a>
+                <a href="#oxy" class="list-group-item scroll">Oxycoin</a>
+                <a href="#shift" class="list-group-item scroll">Shift</a>
+                <a href="#tokens" class="list-group-item scroll">Verification Tokens</a>
+            </div>
+        </div>
+        <div class="col-md-9">
+          <div id="ark">
+          <h2>ARK</h2>
+          <p>ARK-ecosystem wallet settings</p>
+              <div class="container">
+    <div class="row">
+        <div class="col-md-9">
+            <form action="" method="POST" class="padding">
+             {% csrf_token %}
+            {% for hidden in formset.hidden_fields %}
+                {{ hidden }}
+            {% endfor %}
+             {{ formset.management_form }}
+                {% for field in formset %}
+                {% for formfield in field.visible_fields %}
+                    {% if not formfield.label == 'Delete' %}
+                        {% if formfield.label == 'Main ark wallet' %}
+                            <h4>Main Ark wallet</h4>
+                        {% elif formfield.label ==  'Main ark tag'%}
+                            <h4>Main address label</h4>
+                        {% elif formfield.label ==  'Receiving ark address tag'%}
+                            <h4>Second address label</h4>
+                        {% elif formfield.label ==  'Receiving ark address'%}
+                            <h4>Secondary wallet</h4>
+                            {% else %}
+                    <h4>{{ formfield.label }}</h4>
+                            {% endif %}
+                    {{ formfield|add_class:'form-control'}}
+                    {% endif %}
+                <div>&nbsp</div>
+                {% endfor %}
+                {% for hidden in field.hidden_fields %}
+                    {{ hidden }}
+                {% endfor %}
+
+                {% endfor %}
+           <button type="submit" class="btn btn-primary btn-sm left" contenteditable="false">Save</button>
+           <a class="btn btn-primary btn-sm left" contenteditable="false" href="{% url 'console_update' %}">Restore</a>
+
+            </form>
+
+
+</div>
+
+        <div class="span9"></div>
+    </div>
+</div>
+          <hr class="col-md-12">
+          </div>
+          <div id="kapu">
+          <h2>Kapu</h2>
+          <p>Coming soon</p>
+          <hr class="col-md-12">
+          </div>
+          <div id="oxy">
+          <h2>Oxycoin</h2>
+          <p>Coming soon</p>
+          <hr class="col-md-12">
+          </div>
+          <div id="shift">
+          <h2>Shift</h2>
+          <p>Coming soon</p>
+          <hr class="col-md-12">
+          </div>
+          <div id="tokens">
+          <h2>Security Tokens</h2>
+            <table class="table-fill">
+            <thead>
+                <tr>
+                <th class="text-left">Cryptocurrency</th>
+                <th class="text-left">Token</th>
+                </tr>
+            </thead>
+            <tbody class="table-hover">
+                <tr>
+                <td class="text-left">ARK</td>
+                <td class="text-left">{{ arktoken }}</td>
+                </tr>
+                <tr>
+                <td class="text-left">Kapu</td>
+                <td class="text-left">{{ kaputoken }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        </div>
+        <div class="span9"></div>
+    </div>
+</div>
+<div>&nbsp;</div>
+<div>&nbsp;</div>
+<div>&nbsp;</div>
+<div>&nbsp;</div>
+</div>
+{% endblock %}

@@ -1,4 +1,4 @@
-{% extends "graphos/gchart/base.html" %}
+{% extends "graphos/gchart/consolebase.html" %}
 
 {% block chart_specific_arraytodatatable %}
     var data = google.visualization.arrayToDataTable({{ chart.get_data_json|safe }}, true);

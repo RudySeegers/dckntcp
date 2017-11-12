@@ -1,0 +1,46 @@
+{%  extends 'home/base.html' %}
+
+
+{% block content %}
+    <!-- Main jumbotron-->
+        <div class="jumbotron">
+          <div class="container">
+            <h1 class="display-3"> Dutchdelegate</h1>
+            <p>High Payout - Ark Development Support - Cryptocurrency Advice</p>
+            <p><a class="btn btn-primary btn-lg" href="https://medium.com/@Dutch_Delegate/ark-delegated-proof-of-stake-6c9de9a24f58" role="button" target="_blank">Learn about Ark and Delegated Proof of Stake &raquo;</a></p>
+          </div>
+        </div>
+
+        <div class="container">
+          <!-- 3 main columns -->
+          <div class="row">
+            <div class="col-md-4">
+              <h2>Console</h2>
+              <p>Generates a payout report, showing the lifetime staking rewards of your wallets, historic sharing percentages and other data. You can also view your current voter status here as well.</p>
+            </div>
+            <div class="col-md-4">
+              <h2>Monitor</h2>
+              <p>Check the up time of the block forging delegates, total missed blocks, total amount of Ark forged and top forgers.
+                  The monitor is maintained by Dafty, an excellent community developer.&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;</p>
+           </div>
+            <div class="col-md-4">
+              <h2>Blog</h2>
+              <p>Read about our opinions on cryptocurrencies and the Ark Ecosystem.
+              One can find our guides on investments in cryptocurrency, and technical analyses of different projects there.
+              Updates regarding Dutchdelegate will also be posted there first.</p>
+            </div>
+          </div>
+        <div class="row">
+            <div class="col-md-4">
+                <p><a class="btn btn-primary " href="{% url 'console_node' %}" role="button">Console</a></p>
+            </div>
+            <div class="col-md-4">
+              <p><a class="btn btn-primary " href="https://explorer.dafty.net/delegateMonitor" role="button" target="_blank">View details</a></p>
+           </div>
+            <div class="col-md-4">
+              <p><a class="btn btn-primary " href="https://medium.com/@Dutch_Delegate/" role="button" target="_blank">Medium</a></p>
+            </div>
+          </div>
+
+        </div>
+{%endblock %}

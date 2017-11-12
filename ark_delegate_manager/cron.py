@@ -45,6 +45,7 @@ class UpdateVotePool(CronJobBase):
             VotePool.objects.get_or_create(ark_address=address)
         for voter in VotePool.objects.all():
             voter.payout_amount = payouts[voter]['share']
+            voter.save()
 
 
 class RunPayments(CronJobBase):

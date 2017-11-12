@@ -4,6 +4,7 @@ import dj_database_url
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
 
 
 # Quick-start development settings - unsuitable for production
@@ -84,7 +85,7 @@ ROOT_URLCONF = 'delegatewebapp.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'home/templates')],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -161,7 +162,7 @@ RAVEN_CONFIG = {
 
 LOGGING = {
     'version': 1,
-    'disable_existing_loggers': True,
+    'disable_existing_loggers': False,
     'root': {
         'level': 'WARNING',
         'handlers': ['sentry'],
@@ -188,24 +189,27 @@ LOGGING = {
         'django.db.backends': {
             'level': 'ERROR',
             'handlers': ['console'],
-            'propagate': False,
+            'propagate': True,
         },
         'raven': {
             'level': 'DEBUG',
             'handlers': ['console'],
-            'propagate': False,
+            'propagate': True,
         },
         'sentry.errors': {
             'level': 'DEBUG',
             'handlers': ['console'],
-            'propagate': False,
+            'propagate': True,
         },
     },
 }
 
 CRON_CLASSES = [
-    "ark_delegate_manager.cron_jobs.UpdateVotePool",
-    "ark_delegate_manager.cron_jobs.RunPayments",
-    "ark_delegate_manager.cron_jobs.VerifyReceivingArkAddresses",
-    "ark_delegate_manager.cron_jobs.UpdateDutchDelegateStatus",
+    "ark_delegate_manager.cron.UpdateVotePool",
+    "ark_delegate_manager.cron.RunPayments",
+    "ark_delegate_manager.cron.VerifyReceivingArkAddresses",
+    "ark_delegate_manager.cron.UpdateDutchDelegateStatus",
 ]
+
+MEDIA_ROOT = PROJECT_PATH + '/media/'
+
