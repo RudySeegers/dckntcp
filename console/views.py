@@ -25,7 +25,7 @@ def sidebar_context(request):
     try:
         arkmainwallet = current_user.user.main_ark_wallet
     except ObjectDoesNotExist:
-        return edit_user(request)
+        edit_user(request)
 
     arkreceivemain = current_user.user.receiving_ark_address
     arkreceivemaintag = current_user.user.receiving_ark_address_tag
