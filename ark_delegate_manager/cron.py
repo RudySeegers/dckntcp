@@ -99,6 +99,7 @@ class UpdateDelegates(CronJobBase):
     code = 'ark_delegate_manager.update_delegates'
 
     def do(self):
+        api.use('ark')
         all_delegates = utils.api_call(api.Delegate.getDelegates)['delegates']
         for delegate in all_delegates:
             delegate_obj = ArkDelegates.objects.get_or_create(pubkey=delegate['publicKey'])
