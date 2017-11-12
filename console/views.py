@@ -15,7 +15,6 @@ from delegatewebapp.tokens import gen_ark_token, gen_kapu_token
 from . import config
 import arkdbtools.dbtools as arktool
 import arkdbtools.config as arkinfo
-from django import RelatedObjectDoesNotExist
 
 
 logger = logging.getLogger(__name__)
