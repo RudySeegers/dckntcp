@@ -15,8 +15,9 @@ class UserProfile(models.Model):
     ark_send_to_second_address = models.IntegerField(choices=SENDER_CHOICES, default=2)
 
     receiving_ark_address = models.CharField(max_length=34, blank=True, null=True, validators=[address])
-    receiving_ark_address_verified = models.BooleanField(default=False)
     receiving_ark_address_tag = models.CharField(max_length=34, blank=True, null=True)
+
+    receiving_ark_address_verified = models.BooleanField(default=False)
 
     payout_frequency = models.IntegerField(choices=PAYOUT_CHOICES, default=2)
 
