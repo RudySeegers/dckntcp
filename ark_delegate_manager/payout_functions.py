@@ -17,7 +17,7 @@ def send_tx(address, amount, vendor_field=''):
 
     # if we are in testmode, don't actually send the transaction, but log the result:
     if settings.DEBUG:
-        logger.critical('TESTTRANSACTON: ADDRESS  {0}, AMOUNT: {1}'.format(address, amount / info.ARK))
+        logger.info('TESTTRANSACTON: ADDRESS  {0}, AMOUNT: {1}'.format(address, amount / info.ARK))
         return True
 
     tx = arky.core.Transaction(
