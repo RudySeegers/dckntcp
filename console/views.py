@@ -276,7 +276,7 @@ def gen_payout_report(request, wallet, wallet_type):
     # initialize some variables
     total_reward = 0
     payout_result = []
-    share_percentage = 0.95
+    share_p = 'not available'
 
     for tx in payout_history:
         total_reward += tx.amount
