@@ -24,7 +24,7 @@ def sidebar_context(request):
     current_user = User.objects.get(username=request.user.username)
     try:
         arkmainwallet = current_user.user.main_ark_wallet
-    except current_user.user.main_ark_wallet.RelatedObjectDoesNotExist:
+    except current_user.user.RelatedObjectDoesNotExist:
         return edit_user(request)
 
     arkreceivemain = current_user.user.receiving_ark_address
