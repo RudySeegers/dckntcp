@@ -289,6 +289,7 @@ def gen_payout_report(request, wallet, wallet_type):
             for t in info.PAYOUT_DICT[tx.senderId]:
                 if tx.timestamp < t:
                     share_percentage = info.PAYOUT_DICT[tx.senderId][t]
+                    share_p = str(int(100 * share_percentage)) + '%'
 
         # for dutchdelegate voters
         if sender_delegate == 'dutchdelegate':
@@ -298,7 +299,7 @@ def gen_payout_report(request, wallet, wallet_type):
             if share_percentage == 0.95:
                 if vote_timestamp < 16247647 or tx.recipientId in info.EXCEPTIONS:
                     share_percentage = 0.96
-        share_p = str(int(100*share_percentage)) + '%'
+            share_p = str(int(100*share_percentage)) + '%'
 
         payout_result.append(
             {'amount': tx.amount/arkinfo.ARK,
