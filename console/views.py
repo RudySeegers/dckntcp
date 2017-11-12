@@ -374,4 +374,19 @@ def gen_payout_report(request, wallet, wallet_type):
 
     return res
 
+@login_required(login_url='/login/')
+def delegate_report(request):
+    context = sidebar_context(request)
+    delegate_dic = {}
+    delegates = ark_delegate_manager.models.ArkDelegates.objects.all()
+    for i in delegates:
+        delegate_dic.update({
+            'username': i.username,
+            'rank': i.rank,
+            'voters': i.voters,
+            'productivity': i.productivity,
+        })
+    context.update({'delegates': delegate_dic})
+    return render(request, 'console/delegate_report.html', context)
+
 

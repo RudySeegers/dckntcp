@@ -1,0 +1,48 @@
+{% extends consolebase.html %}
+
+{% block labelbar %}
+<div>
+    <ul class="nav nav-tabs">
+        <li><a href="">Payout Report</a></li>
+        <li><a href="">Balance Report</a></li>
+        <li class="dropdown">
+        <a class="dropdown-toggle" data-toggle="dropdown" href="#">Analytics
+        <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+          <li class="active"><a href="{% url 'console_ark_delegate_report' %}">Delegates Report</a></li>
+          <li><a href="#">Ark Distribution</a></li>
+          <li><a href="#">Exchange Report</a></li>
+        </ul>
+        </li>
+    </ul>
+</div>
+{% endblock labelbar %}
+
+{% block content %}
+<div class="table-title">
+    <h3>{{ title }} delegate overview</h3>
+</div>
+
+<table class="table-fill">
+    <thead>
+        <tr>
+            <th class="text-left">Delegate</th>
+            <th class="text-left">Rank</th>
+            <th class="text-left">Voters</th>
+            <th class="text-left">Productivity</th>
+        </tr>
+    </thead>
+
+    <tbody class="table-hover">
+    {% for delegate in delegates %}
+        <tr>
+            <td class="text-left">{{ delegate.username }}</td>
+            <td class="text-left">{{ delegate.rank }}</td>
+            <td class="text-left">{{ delegate.voters }}</td>
+            <td class="text-left">{{ delegate.productivity }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{% endblock content %}
