@@ -7,7 +7,6 @@ from django.core.validators import RegexValidator
 from annoying.fields import AutoOneToOneField
 
 
-
 class UserProfile(models.Model):
     SENDER_CHOICES = ((1, 'Send payout second address'), (2, 'Send payout to voting address'))
     address = RegexValidator(r'A[0-9a-zA-Z]{33}$', 'Only valid address formats are allowed.')
@@ -30,6 +29,7 @@ def create_profile(sender, **kwargs):
         user_profile = UserProfile(user=user)
         user_profile.save()
         post_save.connect(create_profile, sender=User)
+
 
 
 def __str__(self):

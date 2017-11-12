@@ -1,6 +1,7 @@
 from django_cron import CronJobBase, Schedule
-from ark_delegate_manager.models import VotePool
+from ark_delegate_manager.models import VotePool, ArkDelegates
 import arkdbtools.dbtools as ark_node
+import arkdbtools.utils as utils
 import arkdbtools.config as info
 import logging
 import ark_delegate_manager.constants as constants
@@ -90,3 +91,22 @@ class UpdateDutchDelegateStatus(CronJobBase):
 
     def do(self):
         payout_functions.update_arknode()
+
+
+class UpdateDelegates(CronJobBase):
+    RUN_EVERY_MINS = 30
+    schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
+    code = 'ark_delegate_manager.update_delegates'
+
+    def do(self):
+        all_delegates = utils.api_call(api.Delegate.getDelegates)['delegates']
+        for delegate in all_delegates:
+            delegate_obj = ArkDelegates.objects.get_or_create(pubkey=delegate['publicKey'])
+            delegate_obj.username = delegate['username']
+            delegate_obj.address = delegate['address']
+            delegate_obj.ark_votes = delegate['vote']
+            delegate_obj.producedblocks = delegate['producedblocks']
+            delegate_obj.missedblocks = delegate['missedblocks']
+            delegate_obj.productivity = delegate['productivity']
+            delegate_obj.rank = delegate['rate']
+            delegate_obj.voters = len(ark_node.Delegate.voters(delegate['address']) + 1)

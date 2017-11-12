@@ -21,3 +21,14 @@ class DutchDelegateStatus(models.Model):
     productivity = models.FloatField(default=100)
 
 
+class ArkDelegates(models.Model):
+    username = models.CharField(max_length=100)
+    address = RegexValidator(r'A[0-9a-zA-Z]{33}$', 'Only valid address formats are allowed.')
+    pubkey = models.CharField(primary_key=True, max_length=100)
+    address = models.CharField(max_length=34, blank=True, default='', validators=[address], unique=True)
+    voters = models.IntegerField(default=1)
+    productivity = models.FloatField(default=100)
+    ark_votes = models.FloatField(default=0)
+    producedblocks = models.IntegerField(default=0)
+    missedblocks  =models.IntegerField(default=0)
+    rank = models.IntegerField(default=0)

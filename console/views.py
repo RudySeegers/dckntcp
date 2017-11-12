@@ -221,6 +221,23 @@ def console_payout_report_ark_wallet_sec(request):
 
 
 @login_required(login_url='/login/')
+def gen_balance_report(request, wallet, wallet_type):
+    res = {}
+    arktool.set_connection(
+        host=config.CONNECTION['HOST'],
+        database=config.CONNECTION['DATABASE'],
+        user=config.CONNECTION['USER'],
+        password=config.CONNECTION['PASSWORD']
+    )
+
+    arktool.set_delegate(
+        address=config.DELEGATE['ADDRESS'],
+        pubkey=config.DELEGATE['PUBKEY'],
+    )
+
+
+
+@login_required(login_url='/login/')
 def gen_payout_report(request, wallet, wallet_type):
     res = {}
     arktool.set_connection(
@@ -234,6 +251,27 @@ def gen_payout_report(request, wallet, wallet_type):
         address=config.DELEGATE['ADDRESS'],
         pubkey=config.DELEGATE['PUBKEY'],
     )
+
+    # create a placeholder chart in case everything with the node fails
+    data_list = [
+        ['date', 'Payout Amount'],
+        [datetime.datetime.now(), 0]
+    ]
+    data = SimpleDataSource(data=data_list)
+    chart = LineChart(data, options={'title': 'Payout History'})
+    res.update({'chart': chart})
+
+    try:
+        if arktool.Node.check_node(100):
+            arknode_status = True
+        else:
+            arknode_status = False
+            logger.critical('Arknode is more than 100 blocks behind')
+        balance = arktool.Address.balance(wallet)
+        balance_history = arktool.Address.balance_over_time(wallet)
+        height = arktool.Node.height()
+    except Exception:
+        pass
 
     # create a placeholder chart in case everything with the node fails
     data_list = [
@@ -261,11 +299,11 @@ def gen_payout_report(request, wallet, wallet_type):
     # unpack lastvote
     vote_timestamp = last_vote.timestamp
     if last_vote.direction:
-        delegate = last_vote.delegate
+        delegate = ark_delegate_manager.models.ArkDelegates.objects.get(pubkey=last_vote.delegate).username
     else:
         delegate = None
 
-    if delegate == 'dutchdelegate':
+    if delegate == 'dutchdelegate' and wallet_type == 'main_ark':
             try:
                 builduppayout = ark_delegate_manager.models.VotePool.objects.get(ark_address=wallet).payout_amount
             except Exception:
