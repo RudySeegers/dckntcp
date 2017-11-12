@@ -15,6 +15,7 @@ from delegatewebapp.tokens import gen_ark_token, gen_kapu_token
 from . import config
 import arkdbtools.dbtools as arktool
 import arkdbtools.config as arkinfo
+from django import RelatedObjectDoesNotExist
 
 
 logger = logging.getLogger(__name__)
@@ -22,8 +23,11 @@ logger = logging.getLogger(__name__)
 
 def sidebar_context(request):
     current_user = User.objects.get(username=request.user.username)
+    try:
+        arkmainwallet = current_user.user.main_ark_wallet
+    except current_user.user.main_ark_wallet.RelatedObjectDoesNotExist:
+        return edit_user(request)
 
-    arkmainwallet = current_user.user.main_ark_wallet
     arkreceivemain = current_user.user.receiving_ark_address
     arkreceivemaintag = current_user.user.receiving_ark_address_tag
     arkmaintag = current_user.user.main_ark_tag
@@ -184,7 +188,6 @@ def console_node(request):
     dutchdelegate_ark_productivity = dutchdelegateinfo.productivity
     dutchdelegate_total_ark_voted = dutchdelegateinfo.ark_votes
     dutchdelegatevoters = dutchdelegateinfo.voters
-
     context.update({
         'dutchdelegaterank': dutchdelegate_ark_rank,
         'totalarkvoted': dutchdelegate_total_ark_voted,
