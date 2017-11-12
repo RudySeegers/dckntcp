@@ -253,17 +253,10 @@ def gen_payout_report(request, wallet, wallet_type):
         payout_history = arktool.Address.payout(wallet)
         last_vote = arktool.Address.votes(wallet)[0]
         height = arktool.Node.height()
-        if wallet_type == 'main_ark' or wallet_type == 'sec_ark':
-            builduppayout = ark_delegate_manager.models.VotePool.objects.get(ark_address=wallet).payout_amount
-
+        logger.info('balance {0}  payout_history {1}   lastvote {2}   height  {3}'.format(balance, payout_history, last_vote, height))
     except Exception as e:
         logger.warning('{}'.format(e))
         return res
-
-    # initialize some variables
-    total_reward = 0
-    payout_result = []
-    share_percentage = 0.95
 
     # unpack lastvote
     vote_timestamp = last_vote.timestamp
@@ -271,6 +264,18 @@ def gen_payout_report(request, wallet, wallet_type):
         delegate = last_vote.delegate
     else:
         delegate = None
+
+    if delegate == 'dutchdelegate':
+            try:
+                builduppayout = ark_delegate_manager.models.VotePool.objects.get(ark_address=wallet).payout_amount
+            except Exception:
+                pass
+
+
+    # initialize some variables
+    total_reward = 0
+    payout_result = []
+    share_percentage = 0.95
 
     for tx in payout_history:
         total_reward += tx.amount
