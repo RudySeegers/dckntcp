@@ -197,7 +197,10 @@ def console_node(request):
 @login_required(login_url='/login/')
 def console_payout_report_ark_wallet_main(request):
     context = sidebar_context(request)
-    res = gen_payout_report(request, wallet_type='main_ark')
+    address = context['arkwallet1']
+    res = gen_payout_report(wallet=address,
+                            wallet_type='main_ark')
+
     context.update(res)
     return render(request, "console/console_wallet_statistics.html", context)
 
@@ -205,18 +208,16 @@ def console_payout_report_ark_wallet_main(request):
 @login_required(login_url='/login/')
 def console_payout_report_ark_wallet_sec(request):
     context = sidebar_context(request)
-    context.update(gen_payout_report(request, wallet_type='sec_ark'))
+    address = context['arkwallet2']
+    res = gen_payout_report(wallet=address,
+                            wallet_type='sec_ark')
+
+    context.update(res)
     return render(request, "console/console_wallet_statistics.html", context)
 
 
 @login_required(login_url='/login/')
-def gen_payout_report(request, wallet_type):
-    current_user = User.objects.get(username=request.user.username)
-
-    if wallet_type == 'main_ark':
-        wallet = current_user.user.main_ark_wallet
-    elif wallet_type == 'sec_ark':
-        wallet = current_user.user.receiving_ark_address
+def gen_payout_report(wallet, wallet_type):
     res = {}
     arktool.set_connection(
         host=config.CONNECTION['HOST'],
@@ -287,13 +288,12 @@ def gen_payout_report(request, wallet_type):
             if share_percentage == 0.95:
                 if vote_timestamp < 16247647 or tx.recipientId in info.EXCEPTIONS:
                     share_percentage = 0.96
-        print(share_percentage)
-        share_percentage = str(int(100*share_percentage)) + '%'
+        share_p = str(int(100*share_percentage)) + '%'
 
         payout_result.append(
             {'amount': tx.amount/arkinfo.ARK,
              'time': arktool.utils.arkt_to_datetime(tx.timestamp),
-             'share': share_percentage,
+             'share': share_p,
              'delegate': sender_delegate,
              })
     payout_result.reverse()
