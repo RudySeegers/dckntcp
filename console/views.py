@@ -197,7 +197,8 @@ def console_node(request):
 @login_required(login_url='/login/')
 def console_payout_report_ark_wallet_main(request):
     context = sidebar_context(request)
-    context.update(gen_payout_report(request, wallet_type='main_ark'))
+    res = gen_payout_report(request, wallet_type='main_ark')
+    context.update(res)
     return render(request, "console/console_wallet_statistics.html", context)
 
 
@@ -286,6 +287,7 @@ def gen_payout_report(request, wallet_type):
             if share_percentage == 0.95:
                 if vote_timestamp < 16247647 or tx.recipientId in info.EXCEPTIONS:
                     share_percentage = 0.96
+        print(share_percentage)
         share_percentage = str(int(100*share_percentage)) + '%'
 
         payout_result.append(
