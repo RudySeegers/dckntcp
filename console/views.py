@@ -22,11 +22,8 @@ logger = logging.getLogger(__name__)
 
 def sidebar_context(request):
     current_user = User.objects.get(username=request.user.username)
-    try:
-        arkmainwallet = current_user.user.main_ark_wallet
-    except ObjectDoesNotExist:
-        edit_user(request)
 
+    arkmainwallet = current_user.user.main_ark_wallet
     arkreceivemain = current_user.user.receiving_ark_address
     arkreceivemaintag = current_user.user.receiving_ark_address_tag
     arkmaintag = current_user.user.main_ark_tag

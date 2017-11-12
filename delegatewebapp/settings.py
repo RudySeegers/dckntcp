@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     'django_extensions',
     'widget_tweaks',
     'django_cron',
+    'annoying',
 
     # my apps
     'home',
