@@ -270,7 +270,8 @@ def gen_payout_report(request, wallet, wallet_type):
                 builduppayout = ark_delegate_manager.models.VotePool.objects.get(ark_address=wallet).payout_amount
             except Exception:
                 pass
-
+    else:
+        builduppayout = None
 
     # initialize some variables
     total_reward = 0

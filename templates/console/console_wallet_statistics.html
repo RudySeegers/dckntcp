@@ -47,7 +47,9 @@
                     <li><span class="text-muted">{{ wallet }}</span></li>
                     {% endif %}
                     <li><span class="text-muted">Balance: {{ balance }}</span></li>
+                    {% if builduppayout %}
                     <li><span class="text-muted">Built up payout: {{ builduppayout }}</span></li>
+                    {% endif %}
                     <li><span class="text-muted">Total staking reward: {{ total_reward }}</span></li>
                     {% if status %}
                     <li><span class="text-muted">Status: {{ status }}</span></li>
