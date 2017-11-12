@@ -198,8 +198,10 @@ def console_node(request):
 def console_payout_report_ark_wallet_main(request):
     context = sidebar_context(request)
     address = context['arkwallet1']
-    res = gen_payout_report(wallet=address,
-                            wallet_type='main_ark')
+    res = gen_payout_report(
+        request=request,
+        wallet=address,
+        wallet_type='main_ark',)
 
     context.update(res)
     return render(request, "console/console_wallet_statistics.html", context)
@@ -209,15 +211,17 @@ def console_payout_report_ark_wallet_main(request):
 def console_payout_report_ark_wallet_sec(request):
     context = sidebar_context(request)
     address = context['arkwallet2']
-    res = gen_payout_report(wallet=address,
-                            wallet_type='sec_ark')
+    res = gen_payout_report(
+        request=request,
+        wallet=address,
+        wallet_type='sec_ark',)
 
     context.update(res)
     return render(request, "console/console_wallet_statistics.html", context)
 
 
 @login_required(login_url='/login/')
-def gen_payout_report(wallet, wallet_type):
+def gen_payout_report(request, wallet, wallet_type):
     res = {}
     arktool.set_connection(
         host=config.CONNECTION['HOST'],
