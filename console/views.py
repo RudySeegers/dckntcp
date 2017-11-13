@@ -125,9 +125,10 @@ def edit_user(request):
                                                  fields=('main_ark_tag',
                                                          'main_ark_wallet',
                                                          'payout_frequency',
-                                                         'receiving_ark_address',
-                                                         'receiving_ark_address_tag',
-                                                         'ark_send_to_second_address'))
+                                                         # 'receiving_ark_address',
+                                                         # 'receiving_ark_address_tag',
+                                                         # 'ark_send_to_second_address'
+                                                         ))
     formset = ProfileInlineFormset(instance=user)
     username = user
 
