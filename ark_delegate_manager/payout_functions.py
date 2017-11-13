@@ -50,13 +50,13 @@ def paymentrun(payout_dict, current_timestamp):
         try:
             user_settings = console.models.UserProfile.objects.get(main_ark_wallet=voter)
             frequency = user_settings.payout_frequency
-            receiving_address = user_settings.receiving_ark_address
-            verified = user_settings.receiving_ark_address_verified
-            send_to_second = user_settings.ark_send_to_second_address
+            # receiving_address = user_settings.receiving_ark_address
+            # verified = user_settings.receiving_ark_address_verified
+            # send_to_second = user_settings.ark_send_to_second_address
 
             #send_to_second is not a bool, because the widget for an integerfield is much prettier
-            if verified and send_to_second == 1:
-                send_destination = receiving_address
+            # if verified and send_to_second == 1:
+            #     send_destination = receiving_address
         except Exception:
             pass
         if payout_dict[voter]['vote_timestamp'] < constants.CUT_OFF_EARLY_ADOPTER or \
@@ -75,6 +75,7 @@ def paymentrun(payout_dict, current_timestamp):
                 #         logger.fatal('failed to send administrative token to {}'.format(voter))
         if frequency == 2 and payout_dict[voter]['last_payout'] < current_timestamp - constants.WEEK:
             if amount > constants.MIN_AMOUNT_WEEKY:
+                amount += info.TX_FEE
                 # admin_res = send_tx(address=voter, amount=1,
                 #                     vendor_field='|DD-admin| sent payout to: '.format(send_destination))
                 res = send_tx(address=send_destination, amount=amount)
@@ -83,6 +84,7 @@ def paymentrun(payout_dict, current_timestamp):
                 #         logger.fatal('failed to send administrative token to {}'.format(voter))
         if frequency == 3 and payout_dict[voter]['last_payout'] < current_timestamp - constants.MONTH:
             if amount > constants.MIN_AMOUNT_MONTHLY:
+                amount += info.TX_FEE
                 # admin_res = send_tx(address=voter, amount=1,
                 #                     vendor_field='|DD-admin| sent payout to: '.format(send_destination))
                 res = send_tx(address=send_destination, amount=amount)
