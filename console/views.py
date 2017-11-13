@@ -182,7 +182,7 @@ def console_node(request):
 @login_required(login_url='/login/')
 def console_payout_report_ark_wallet_main(request):
     context = sidebar_context(request)
-    address = context['arkwallet1']
+    address = context['arkmainwallet']
     res = gen_payout_report(
         request=request,
         wallet=address,
@@ -195,7 +195,7 @@ def console_payout_report_ark_wallet_main(request):
 @login_required(login_url='/login/')
 def console_payout_report_ark_wallet_sec(request):
     context = sidebar_context(request)
-    address = context['arkwallet2']
+    address = context['arksecwallet']
     res = gen_payout_report(
         request=request,
         wallet=address,
