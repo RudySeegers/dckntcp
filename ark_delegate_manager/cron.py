@@ -136,7 +136,7 @@ class UpdateDelegates(CronJobBase):
                 delegate_obj.missedblocks = delegate['missedblocks']
                 delegate_obj.productivity = delegate['productivity']
                 delegate_obj.rank = delegate['rate']
-                delegate_obj.voters = len(ark_node.Delegate.voters(delegate['address']) + 1)
+                delegate_obj.voters = len(ark_node.Delegate.voters(delegate['address'])) + 1
                 delegate_obj.save()
         except Exception:
             logger.exception('Error during UpdateDelegates')
