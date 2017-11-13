@@ -10,6 +10,9 @@ urlpatterns = [
     url(r'^update/not_saved/$', views.not_saved, name='not_saved'),
     url(r'^arkwalletmain/$', views.console_payout_report_ark_wallet_main, name='console_payout_report_arkwalletmain'),
     url(r'^arkwalletsec/$', views.console_payout_report_ark_wallet_sec, name='console_payout_report_arkwalletsec'),
+    url(r'^arkwalletmain/balancereport$', views.console_balance_report_ark_wallet_main, name='console_balance_report_arkwalletmain'),
+    url(r'^arkwalletsec/balancereport$$', views.console_balance_report_ark_wallet_sec, name='console_balance_report_arkwalletsec'),
+
     url(r'^arkdelegatereport/$', views.delegate_report, name='console_ark_delegate_report'),
 
 ]

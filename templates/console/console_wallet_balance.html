@@ -5,8 +5,8 @@
 {% block labelbar %}
 <div>
     <ul class="nav nav-tabs">
-        <li><a href="">Payout Report</a></li>
-        <li class="active"><a href="">Balance Report</a></li>
+        <li><a href="{% url 'console_payout_report_arkwalletmain'%}">Payout Report</a></li>
+        <li class="active"><a href="{% url 'console_balance_report_arkwalletmain' %}">Balance Report</a></li>
         <li class="dropdown">
         <a class="dropdown-toggle" data-toggle="dropdown" href="#">Analytics
         <span class="caret"></span></a>
