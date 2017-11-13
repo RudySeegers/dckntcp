@@ -36,6 +36,7 @@ def sidebar_context(request):
         'arksecwallet': arkreceivemain,
         'arksectag': arkreceivemaintag,
         'arkmaintag': arkmaintag,
+        'error': True
     }
 
     return context
@@ -103,7 +104,8 @@ def console_wallet_history(request):
         tx_dic.update({x.id: {'amount': amount,
                               'type': txtype,
                               'otherparty': otherparty}})
-    context.update({'tx_dic': tx_dic})
+    context.update({'tx_dic': tx_dic,
+                    'error': False})
     return render(request, 'console/console_wallet_statistics.html', context)
 
 
@@ -174,7 +176,8 @@ def console_node(request):
         'totalarkvoted': dutchdelegate_total_ark_voted,
         'totalvoters': dutchdelegatevoters,
         'productivity': dutchdelegate_ark_productivity,
-        'first': True
+        'first': True,
+        'error': False,
     })
     return render(request, "console/console_node.html", context)
 

@@ -156,14 +156,14 @@ function fixBodyPadding(className) {
   </nav>
 {% endblock %}
 
-
+{% if not error or first%}
     {% block content %}
     {% endblock content %}
-
-<div>&nbsp;</div>
-<div>&nbsp;</div>
-<div>&nbsp;</div>
-<div>&nbsp;</div>
+{% else %}
+    <div>&nbsp;</div>
+    <div>&nbsp;</div>
+    <div>&nbsp;</div>
+    <div>&nbsp;</div>
 
 <div class="alert alert-info container">
     <strong>Oops!</strong> it seems that our ark node cannot find your address. Most likely
