@@ -274,7 +274,7 @@ def gen_balance_report(request, wallet):
     balances = []
     for balance in balance_over_time:
         data_list.append([arktool.utils.arkt_to_datetime(balance.timestamp).strftime('%d/%m/%Y'), balance.amount/arkinfo.ARK])
-        balances.append({'timestamp': balance.timestamp,
+        balances.append({'timestamp': arktool.utils.arkt_to_datetime(balance.timestamp),
                          'balance': balance.amount})
 
     data = SimpleDataSource(data=data_list)
@@ -286,9 +286,10 @@ def gen_balance_report(request, wallet):
         stake_amount += i.amount/arkinfo.ARK
 
     res.update({'chart': chart,
-                'stakeamout': stake_amount,
+                'stakeamount': stake_amount,
                 'balances': balances,
-                'error': False,})
+                'error': False,
+                'wallet': wallet})
     return res
 
 @login_required(login_url='/login/')
