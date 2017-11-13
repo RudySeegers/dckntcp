@@ -198,8 +198,7 @@ def console_payout_report_ark_wallet_main(request):
         wallet_type='main_ark',)
 
     context.update(res)
-    context.update({'error': False,
-                    'wallettag': wallettag})
+    context.update({'wallettag': wallettag})
     return render(request, "console/console_wallet_statistics.html", context)
 
 
@@ -219,14 +218,43 @@ def console_payout_report_ark_wallet_sec(request):
         wallet_type='sec_ark',)
 
     context.update(res)
-    context.update({'error': False,
-                    'wallettag': wallettag})
+    context.update({'wallettag': wallettag})
 
     return render(request, "console/console_wallet_statistics.html", context)
 
 
 @login_required(login_url='/login/')
-def gen_balance_report(request, wallet, wallet_type):
+def console_balance_report_ark_wallet_sec(request):
+    context = sidebar_context(request)
+    address = context['arksecwallet']
+    wallettag = None
+    try:
+        wallettag = context['arksectag']
+    except Exception:
+        pass
+    res = gen_balance_report(request, address)
+    context.update(res)
+    context.update({'wallettag': wallettag})
+    return render(request, 'console/console_wallet_balance.html', context)
+
+
+@login_required(login_url='/login/')
+def console_balance_report_ark_wallet_main(request):
+    context = sidebar_context(request)
+    address = context['arkmainwallet']
+    wallettag = None
+    try:
+        wallettag = context['arkmaintag']
+    except Exception:
+        pass
+    res = gen_balance_report(request, address)
+    context.update(res)
+    context.update({'wallettag': wallettag})
+    return render(request, 'console/console_wallet_balance.html', context)
+
+
+@login_required(login_url='/login/')
+def gen_balance_report(request, wallet):
     res = {}
     arktool.set_connection(
         host=config.CONNECTION['HOST'],
@@ -240,6 +268,27 @@ def gen_balance_report(request, wallet, wallet_type):
         pubkey=config.DELEGATE['PUBKEY'],
     )
 
+    balance_over_time = arktool.Address.balance_over_time(wallet)
+    data_list = [['date', 'balance']]
+    balances = []
+    for balance in balance_over_time:
+        data_list.append([arktool.utils.arkt_to_datetime(balance.timestamp).strftime('%d/%m/%Y'), balance.amount/arkinfo.ARK])
+        balances.append({'timestamp': balance.timestamp,
+                         'balance': balance.amount})
+
+    data = SimpleDataSource(data=data_list)
+    chart = LineChart(data, options={'title': 'Payout History'})
+    stake_amount = 0
+
+    payouts = arktool.Address.payout(wallet)
+    for i in payouts:
+        stake_amount += i.amount/arkinfo.ARK
+
+    res.update({'chart': chart,
+                'stakeamout': stake_amount,
+                'balances': balances,
+                'error': False,})
+    return res
 
 @login_required(login_url='/login/')
 def gen_payout_report(request, wallet, wallet_type):
@@ -326,7 +375,6 @@ def gen_payout_report(request, wallet, wallet_type):
     else:
         status = None
 
-    logger.critical(data_list)
     data = SimpleDataSource(data=data_list)
     chart = LineChart(data, options={'title': 'Payout History'})
 
@@ -342,6 +390,7 @@ def gen_payout_report(request, wallet, wallet_type):
         'info': None,
         'status': status,
         'builduppayout': builduppayout,
+        'error': False,
         })
 
     return res
