@@ -47,8 +47,7 @@ class UpdateVotePool(CronJobBase):
             except Exception:
                 logger.exception('failed to calculate payouts')
             for address in payouts:
-                VotePool.objects.update_or_create(ark_address=address)
-            for voter in VotePool.objects.all():
+                voter = VotePool.objects.update_or_create(ark_address=address)
                 voter.payout_amount = payouts[voter]['share']
                 voter.save()
         except Exception:
