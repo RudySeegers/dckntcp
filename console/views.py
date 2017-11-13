@@ -186,13 +186,20 @@ def console_node(request):
 def console_payout_report_ark_wallet_main(request):
     context = sidebar_context(request)
     address = context['arkmainwallet']
+    wallettag = None
+    try:
+        wallettag = context['arkmaintag']
+    except Exception:
+        pass
+
     res = gen_payout_report(
         request=request,
         wallet=address,
         wallet_type='main_ark',)
 
     context.update(res)
-    context.update({'error': False})
+    context.update({'error': False,
+                    'wallettag': wallettag})
     return render(request, "console/console_wallet_statistics.html", context)
 
 
@@ -200,13 +207,20 @@ def console_payout_report_ark_wallet_main(request):
 def console_payout_report_ark_wallet_sec(request):
     context = sidebar_context(request)
     address = context['arksecwallet']
+    wallettag = None
+    try:
+        wallettag = context['arksectag']
+    except Exception:
+        pass
+
     res = gen_payout_report(
         request=request,
         wallet=address,
         wallet_type='sec_ark',)
 
     context.update(res)
-    context.update({'error': False})
+    context.update({'error': False,
+                    'wallettag': wallettag})
 
     return render(request, "console/console_wallet_statistics.html", context)
 
