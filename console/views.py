@@ -236,20 +236,7 @@ def gen_payout_report(request, wallet, wallet_type):
         pubkey=config.DELEGATE['PUBKEY'],
     )
 
-    # create a placeholder chart in case everything with the node fails
-    data_list = [
-        ['date', 'Payout Amount'],
-        [datetime.datetime.now(), 0]
-    ]
-    data = SimpleDataSource(data=data_list)
-    chart = LineChart(data, options={'title': 'Payout History'})
-    res.update({'chart': chart})
     try:
-        if arktool.Node.check_node(100):
-            arknode_status = True
-        else:
-            arknode_status = False
-            logger.critical('Arknode is more than 100 blocks behind')
         balance = arktool.Address.balance(wallet)
         payout_history = arktool.Address.payout(wallet)
         last_vote = arktool.Address.votes(wallet)[0]
@@ -278,6 +265,7 @@ def gen_payout_report(request, wallet, wallet_type):
     total_reward = 0
     payout_result = []
     share_p = 'not available'
+    data_list = []
 
     for tx in payout_history:
         total_reward += tx.amount
