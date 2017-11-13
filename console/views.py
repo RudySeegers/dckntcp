@@ -270,7 +270,7 @@ def gen_balance_report(request, wallet):
     )
 
     balance_over_time = arktool.Address.balance_over_time(wallet)
-    data_list = [['date', 'balance']]
+    data_list = [['date', 'Balance']]
     balances = []
     for balance in balance_over_time:
         data_list.append([arktool.utils.arkt_to_datetime(balance.timestamp).strftime('%d/%m/%Y'), balance.amount/arkinfo.ARK])
@@ -278,7 +278,7 @@ def gen_balance_report(request, wallet):
                          'balance': balance.amount/arkinfo.ARK})
 
     data = SimpleDataSource(data=data_list)
-    chart = LineChart(data, options={'title': 'Payout History'})
+    chart = LineChart(data, options={'title': 'Balance History'})
     stake_amount = 0
 
     payouts = arktool.Address.payout(wallet)
@@ -336,7 +336,7 @@ def gen_payout_report(request, wallet, wallet_type):
     total_reward = 0
     payout_result = []
     share_p = 'not available'
-    data_list = [['date', 'amount']]
+    data_list = [['date', 'Payout amount']]
     builduppayout = 0
 
     for tx in payout_history:
