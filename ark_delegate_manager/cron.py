@@ -1,5 +1,5 @@
 from django_cron import CronJobBase, Schedule
-from ark_delegate_manager.models import VotePool, ArkDelegates
+from ark_delegate_manager.models import VotePool, ArkDelegates, Node
 import arkdbtools.dbtools as ark_node
 import arkdbtools.utils as utils
 import arkdbtools.config as info
@@ -141,3 +141,19 @@ class UpdateDelegates(CronJobBase):
                 delegate_obj.save()
         except Exception:
             logger.exception('Error during UpdateDelegates')
+
+
+class GetBlockchainHeight(CronJobBase):
+    RUN_EVERY_MINS = 5
+    schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
+    code = 'ark_delegate_manager.get_blockchain_height'
+
+    def do(self):
+        try:
+            api.use('ark')
+            blockchain_height = ark_node.Blockchain.height()
+            node = Node.objects.get_or_create(id='main')[0]
+            node.blockchain_height = blockchain_height
+            node.save()
+        except Exception:
+            logger.exception('failed to update blockchain height')
