@@ -49,8 +49,8 @@ class UpdateVotePool(CronJobBase):
                 return
             for address in payouts:
                 voter, created = VotePool.objects.update_or_create(
-                    ark_address=address,
-                    payout_amount=payouts[address]['share'])
+                    ark_address=address)
+                voter.payout_amount = payouts[address]['share']
                 voter.save()
         except Exception:
             logger.exception('error in UpdateVotePool')
