@@ -33,3 +33,8 @@ class ArkDelegates(models.Model):
     producedblocks = models.IntegerField(default=0)
     missedblocks  =models.IntegerField(default=0)
     rank = models.IntegerField(default=0)
+
+
+class Node(models.Model):
+    id = models.CharField(default='main', primary_key=True, max_length=10)
+    blockchain_height = models.IntegerField(default=0)

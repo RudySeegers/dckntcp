@@ -266,6 +266,7 @@ def gen_payout_report(request, wallet, wallet_type):
     payout_result = []
     share_p = 'not available'
     data_list = []
+    builduppayout = 0
 
     for tx in payout_history:
         total_reward += tx.amount
@@ -320,7 +321,6 @@ def gen_payout_report(request, wallet, wallet_type):
         'info': None,
         'status': status,
         'builduppayout': builduppayout,
-        'arknodestatus': arknode_status
         })
 
     return res
