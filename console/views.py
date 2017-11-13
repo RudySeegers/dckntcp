@@ -192,6 +192,7 @@ def console_payout_report_ark_wallet_main(request):
         wallet_type='main_ark',)
 
     context.update(res)
+    context.update({'error': False})
     return render(request, "console/console_wallet_statistics.html", context)
 
 
@@ -205,6 +206,8 @@ def console_payout_report_ark_wallet_sec(request):
         wallet_type='sec_ark',)
 
     context.update(res)
+    context.update({'error': False})
+
     return render(request, "console/console_wallet_statistics.html", context)
 
 
