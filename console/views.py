@@ -326,6 +326,7 @@ def gen_payout_report(request, wallet, wallet_type):
     else:
         status = None
 
+    logger.critical(data_list)
     data = SimpleDataSource(data=data_list)
     chart = LineChart(data, options={'title': 'Payout History'})
 
