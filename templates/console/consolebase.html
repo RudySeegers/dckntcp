@@ -85,9 +85,9 @@ function fixBodyPadding(className) {
                 <li><a href="{% url 'console_payout_report_arkwalletmain'%}"> {{arkmainwallet}} </a></li>
             {% endif %}
             {% if arksectag %}
-                <li><a href="{% url 'console_payout_report_arkwalletmain'%}"> {{arksectag}} </a></li>
+                <li><a href="{% url 'console_payout_report_arkwalletsec'%}"> {{arksectag}} </a></li>
             {% elif  arksecwallet%}
-                <li><a href="{% url 'console_payout_report_arkwalletmain'%}"> {{arksecwallet}} </a></li>
+                <li><a href="{% url 'console_payout_report_arkwalletsec'%}"> {{arksecwallet}} </a></li>
             {% endif %}
 
                 <li role="separator" class="divider"></li>
