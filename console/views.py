@@ -236,7 +236,6 @@ def gen_balance_report(request, wallet, wallet_type):
     )
 
 
-
 @login_required(login_url='/login/')
 def gen_payout_report(request, wallet, wallet_type):
     res = {}
@@ -260,27 +259,6 @@ def gen_payout_report(request, wallet, wallet_type):
     data = SimpleDataSource(data=data_list)
     chart = LineChart(data, options={'title': 'Payout History'})
     res.update({'chart': chart})
-
-    try:
-        if arktool.Node.check_node(100):
-            arknode_status = True
-        else:
-            arknode_status = False
-            logger.critical('Arknode is more than 100 blocks behind')
-        balance = arktool.Address.balance(wallet)
-        balance_history = arktool.Address.balance_over_time(wallet)
-        height = arktool.Node.height()
-    except Exception:
-        pass
-
-    # create a placeholder chart in case everything with the node fails
-    data_list = [
-        ['date', 'Payout Amount'],
-        [datetime.datetime.now(), 0]
-    ]
-    data = SimpleDataSource(data=data_list)
-    chart = LineChart(data, options={'title': 'Payout History'})
-    res.update({'chart': chart})
     try:
         if arktool.Node.check_node(100):
             arknode_status = True
@@ -292,8 +270,8 @@ def gen_payout_report(request, wallet, wallet_type):
         last_vote = arktool.Address.votes(wallet)[0]
         height = arktool.Node.height()
         logger.info('balance {0}  payout_history {1}   lastvote {2}   height  {3}'.format(balance, payout_history, last_vote, height))
-    except Exception as e:
-        logger.warning('{}'.format(e))
+    except Exception:
+        logger.exception('error in obtaining ark-data in gen_payout_report')
         return res
 
     # unpack lastvote
@@ -373,6 +351,7 @@ def gen_payout_report(request, wallet, wallet_type):
         })
 
     return res
+
 
 @login_required(login_url='/login/')
 def delegate_report(request):

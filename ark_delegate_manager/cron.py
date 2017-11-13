@@ -42,15 +42,17 @@ class UpdateVotePool(CronJobBase):
             if not ark_node.Node.check_node(51) and settings.DEBUG == False:
                 logger.fatal('Node is more than 51 blocks behind')
                 return
-            payouts, timestamp = ark_node.Delegate.trueshare()
-
+            try:
+                payouts, timestamp = ark_node.Delegate.trueshare()
+            except Exception:
+                logger.exception('failed to calculate payouts')
             for address in payouts:
-                VotePool.objects.get_or_create(ark_address=address)
+                VotePool.objects.update_or_create(ark_address=address)
             for voter in VotePool.objects.all():
                 voter.payout_amount = payouts[voter]['share']
                 voter.save()
-        except Exception as e:
-            logger.warning('error in UpdateVotePool {}'.format(e))
+        except Exception:
+            logger.exception('error in UpdateVotePool')
 
 
 class RunPayments(CronJobBase):
@@ -72,8 +74,8 @@ class RunPayments(CronJobBase):
                 payout_dict=payouts,
                 current_timestamp=timestamp
             )
-        except Exception as e:
-            logger.critical('error in RunPayments: {}'.format(e))
+        except Exception:
+            logger.exception('error in RunPayments')
 
 
 class VerifyReceivingArkAddresses(CronJobBase):
@@ -89,8 +91,8 @@ class VerifyReceivingArkAddresses(CronJobBase):
             return
         try:
             payout_functions.verify_address_run()
-        except Exception as e:
-            logger.warning('Error during VerifyReceivingArkAddresses: {}'.format(e))
+        except Exception:
+            logger.exception('Error during VerifyReceivingArkAddresses')
 
 
 class UpdateDutchDelegateStatus(CronJobBase):
@@ -101,8 +103,8 @@ class UpdateDutchDelegateStatus(CronJobBase):
     def do(self):
         try:
             payout_functions.update_arknode()
-        except Exception as e:
-            logger.warning('Error during UpdateDutchDelegateStatus: {}'.format(e))
+        except Exception:
+            logger.exception('Error during UpdateDutchDelegateStatus')
 
 
 class UpdateDelegates(CronJobBase):
@@ -126,7 +128,7 @@ class UpdateDelegates(CronJobBase):
             )
             all_delegates = utils.api_call(api.Delegate.getDelegates)['delegates']
             for delegate in all_delegates:
-                delegate_obj = ark_delegate_manager.models.ArkDelegates.objects.get_or_create(pubkey=delegate['publicKey'])
+                delegate_obj = ark_delegate_manager.models.ArkDelegates.objects.get_or_create(pubkey=delegate['publicKey'])[0]
                 delegate_obj.username = delegate['username']
                 delegate_obj.address = delegate['address']
                 delegate_obj.ark_votes = delegate['vote']
@@ -136,5 +138,5 @@ class UpdateDelegates(CronJobBase):
                 delegate_obj.rank = delegate['rate']
                 delegate_obj.voters = len(ark_node.Delegate.voters(delegate['address']) + 1)
                 delegate_obj.save()
-        except Exception as e:
-            logger.warning('Error during UpdateDelegates: {}'.format(e))
+        except Exception:
+            logger.exception('Error during UpdateDelegates')

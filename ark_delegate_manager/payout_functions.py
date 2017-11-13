@@ -13,7 +13,6 @@ logger = logging.getLogger(__name__)
 
 
 def send_tx(address, amount, vendor_field=''):
-    result = None
 
     # if we are in testmode, don't actually send the transaction, but log the result:
     if settings.DEBUG:
@@ -27,13 +26,12 @@ def send_tx(address, amount, vendor_field=''):
     )
     tx.sign(config.DELEGATE['SECRET'])
     tx.serialize()
-    for attempt in range(10):
-        arky.api.use('ark')
-        result = arky.api.broadcast(tx)
-        if result['success']:
-            logger.info('succesfull transacton for {0}, '
-                        'for amount: {1}. RESPONSE: {2}'.format(address, amount, result))
-            return True
+    arky.api.use('ark')
+    result = arky.api.broadcast(tx)
+    if result['success']:
+        logger.info('succesfull transacton for {0}, '
+                    'for amount: {1}. RESPONSE: {2}'.format(address, amount, result))
+        return True
 
     # if after 5 attempts we still failed:
     if not result['success']:
@@ -69,29 +67,28 @@ def paymentrun(payout_dict, current_timestamp):
 
         if frequency == 1 and payout_dict[voter]['last_payout'] < current_timestamp - constants.DAY:
             if amount > constants.MIN_AMOUNT_DAILY:
-                admin_res = send_tx(address=voter, amount=1,
-                                    vendor_field='|DD-admin| sent payout to: '.format(send_destination))
+                # admin_res = send_tx(address=voter, amount=1,
+                #                     vendor_field='|DD-admin| sent payout to: '.format(send_destination))
                 res = send_tx(address=send_destination, amount=amount)
-                if res and verified:
-
-                    if not admin_res:
-                        logger.fatal('failed to send administrative token to {}'.format(voter))
+                # if res and verified:
+                #     if not admin_res:
+                #         logger.fatal('failed to send administrative token to {}'.format(voter))
         if frequency == 2 and payout_dict[voter]['last_payout'] < current_timestamp - constants.WEEK:
             if amount > constants.MIN_AMOUNT_WEEKY:
-                admin_res = send_tx(address=voter, amount=1,
-                                    vendor_field='|DD-admin| sent payout to: '.format(send_destination))
+                # admin_res = send_tx(address=voter, amount=1,
+                #                     vendor_field='|DD-admin| sent payout to: '.format(send_destination))
                 res = send_tx(address=send_destination, amount=amount)
-                if res and verified:
-                    if not admin_res:
-                        logger.fatal('failed to send administrative token to {}'.format(voter))
+                # if res and verified:
+                #     if not admin_res:
+                #         logger.fatal('failed to send administrative token to {}'.format(voter))
         if frequency == 3 and payout_dict[voter]['last_payout'] < current_timestamp - constants.MONTH:
             if amount > constants.MIN_AMOUNT_MONTHLY:
-                admin_res = send_tx(address=voter, amount=1,
-                                    vendor_field='|DD-admin| sent payout to: '.format(send_destination))
+                # admin_res = send_tx(address=voter, amount=1,
+                #                     vendor_field='|DD-admin| sent payout to: '.format(send_destination))
                 res = send_tx(address=send_destination, amount=amount)
-                if res and verified:
-                    if not admin_res:
-                        logger.fatal('failed to send administrative token to {}'.format(voter))
+                # if res and verified:
+                    # if not admin_res:
+                    #     logger.fatal('failed to send administrative token to {}'.format(voter))
     return True
 
 
@@ -150,19 +147,19 @@ def update_arknode():
             try:
                 arky.api.use('ark')
                 dutchdelegatestatus = utils.api_call(arky.api.Delegate.getDelegate, 'dutchdelegate')
-                dutchdelegate_ark_rank = dutchdelegatestatus['delegate']['rate']
-                dutchdelegate_ark_productivity = dutchdelegatestatus['delegate']['productivity']
-                dutchdelegate_total_ark_voted = int(dutchdelegatestatus['delegate']['vote']) / info.ARK
-                voters = len(ark_node.Delegate.voters())
-            except Exception:
-                pass
-        if not dutchdelegatestatus['success']:
-            logger.fatal('unable to update the status of dutchdelegate node after 5 tries: response: {}'.format(dutchdelegatestatus))
-            return
+                if not dutchdelegatestatus['success']:
+                    logger.fatal('unable to update the status of dutchdelegate node after 5 tries: response: {}'.format(
+                        dutchdelegatestatus))
+                    return
 
-        data = ark_delegate_manager.models.DutchDelegateStatus.objects.get_or_create(id='main')[0]
-        data.rank = int(dutchdelegate_ark_rank)
-        data.ark_votes = dutchdelegate_total_ark_voted
-        data.voters = voters
-        data.productivity = dutchdelegate_ark_productivity
-        data.save()
+                data = ark_delegate_manager.models.DutchDelegateStatus.objects.get_or_create(id='main')[0]
+                data.rank = int(dutchdelegatestatus['delegate']['rate'])
+                data.ark_votes = int(dutchdelegatestatus['delegate']['vote']) / info.ARK
+                data.voters = len(ark_node.Delegate.voters())
+                data.productivity = float(dutchdelegatestatus['delegate']['productivity'])
+                data.save()
+            except Exception:
+                logger.exception('error in update_arknode')
+
+
+
