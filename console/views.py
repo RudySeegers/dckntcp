@@ -20,13 +20,16 @@ from django.core.exceptions import ObjectDoesNotExist
 logger = logging.getLogger(__name__)
 
 
+@login_required(login_url='/login/')
 def sidebar_context(request):
     current_user = User.objects.get(username=request.user.username)
 
     arkmainwallet = current_user.user.main_ark_wallet
+    arkmaintag = current_user.user.main_ark_tag
+
     arkreceivemain = current_user.user.receiving_ark_address
     arkreceivemaintag = current_user.user.receiving_ark_address_tag
-    arkmaintag = current_user.user.main_ark_tag
+    logger.critical('{0}, {1}, {2}, {3}'.format(arkmainwallet, arkmaintag, arkreceivemain, arkreceivemaintag))
 
     context = {
         'arkmainwallet': arkmainwallet,
@@ -165,6 +168,7 @@ def console_node(request):
     dutchdelegate_ark_productivity = dutchdelegateinfo.productivity
     dutchdelegate_total_ark_voted = dutchdelegateinfo.ark_votes
     dutchdelegatevoters = dutchdelegateinfo.voters
+
     context.update({
         'dutchdelegaterank': dutchdelegate_ark_rank,
         'totalarkvoted': dutchdelegate_total_ark_voted,

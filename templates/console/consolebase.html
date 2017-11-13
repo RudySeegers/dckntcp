@@ -79,17 +79,21 @@ function fixBodyPadding(className) {
           <li class="dropdown" style="border-top: 1px solid white">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="font-size: 300%">ARK</a>
             <ul class="dropdown-menu">
-            {% if arkwallet1 %}
-                <li><a href="{% url 'console_payout_report_arkwalletmain'%}"> {{arkwallet1}} </a></li>
+            {% if arkmaintag %}
+                <li><a href="{% url 'console_payout_report_arkwalletmain'%}"> {{arkmaintag}} </a></li>
+            {% elif arkmainwallet %}
+                <li><a href="{% url 'console_payout_report_arkwalletmain'%}"> {{arkmainwallet}} </a></li>
             {% endif %}
-            {% if arkwallet2 %}
-                <li><a href="{% url 'console_payout_report_arkwalletsec'%}"> {{arkwallet2}} </a></li>
+            {% if arksectag %}
+                <li><a href="{% url 'console_payout_report_arkwalletmain'%}"> {{arksectag}} </a></li>
+            {% elif  arksecwallet%}
+                <li><a href="{% url 'console_payout_report_arkwalletmain'%}"> {{arksecwallet}} </a></li>
             {% endif %}
 
                 <li role="separator" class="divider"></li>
                 <li class="dropdown-header"></li>
                 <li><a href="{% url 'console_update' %}#ark">
-                 {% if not arkwallet1 %}
+                 {% if not arkmainwallet %}
                     add wallet
                        {% else %}
                     configure wallets
