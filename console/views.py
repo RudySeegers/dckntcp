@@ -28,30 +28,11 @@ def sidebar_context(request):
     arkreceivemaintag = current_user.user.receiving_ark_address_tag
     arkmaintag = current_user.user.main_ark_tag
 
-    ark_wallet_1 = None
-    ark_wallet_2 = None
-
-    if not arkmaintag:
-        ark_wallet_1 = arkmainwallet
-    else: ark_wallet_1 = arkmaintag
-
-    if arkreceivemain:
-        ark_wallet_2 = arkreceivemain
-        if arkreceivemaintag:
-            ark_wallet_2 = arkreceivemaintag
-
-    total_supported_arkwallets = ark_wallet_1, ark_wallet_2
-
-    kapuwallets = None
-    oxywallets = None
-    shiftwallets = None
-
     context = {
-        'arkwallet1': ark_wallet_1,
-        'arkwallet2': ark_wallet_2,
-        'kapuwallets': kapuwallets,
-        'oxywallets': oxywallets,
-        'shiftwallets': shiftwallets,
+        'arkmainwallet': arkmainwallet,
+        'arksecwallet': arkreceivemain,
+        'arksectag': arkreceivemaintag,
+        'arkmaintag': arkmaintag,
     }
 
     return context
