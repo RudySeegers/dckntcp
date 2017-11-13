@@ -46,6 +46,7 @@ class UpdateVotePool(CronJobBase):
                 payouts, timestamp = ark_node.Delegate.trueshare()
             except Exception:
                 logger.exception('failed to calculate payouts')
+                return
             for address in payouts:
                 voter, created = VotePool.objects.update_or_create(
                     ark_address=address,
