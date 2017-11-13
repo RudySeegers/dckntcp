@@ -7,8 +7,13 @@
     <meta name="author" content="Charles">
     <title>Dutchdelegate</title>
 {% load static %}
+  <link rel="shortcut icon" href="{%  static 'favicon.png' %}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.7/paper/bootstrap.min.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+  <link rel="stylesheet" href="{% static 'home/css/dashboard.css'%} ">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
   <script>$(document).ready(function () {
   $('a[data-class]').click(function () {
     updateNavbarClass($(this).attr('data-class'));
@@ -46,12 +51,7 @@ function fixBodyPadding(className) {
     });
   }
 }</script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.7/paper/bootstrap.min.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
-  <link rel="stylesheet" href="{% static 'home/css/dashboard.css'%} ">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
-  <script async defer src="https://buttons.github.io/buttons.js"></script>
+
 </head>
 
 <body>
