@@ -285,7 +285,7 @@ def gen_payout_report(request, wallet, wallet_type):
     total_reward = 0
     payout_result = []
     share_p = 'not available'
-    data_list = []
+    data_list = ['date, amount']
     builduppayout = 0
 
     for tx in payout_history:
