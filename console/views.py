@@ -275,7 +275,7 @@ def gen_balance_report(request, wallet):
     for balance in balance_over_time:
         data_list.append([arktool.utils.arkt_to_datetime(balance.timestamp).strftime('%d/%m/%Y'), balance.amount/arkinfo.ARK])
         balances.append({'timestamp': arktool.utils.arkt_to_datetime(balance.timestamp),
-                         'balance': balance.amount})
+                         'balance': balance.amount/arkinfo.ARK})
 
     data = SimpleDataSource(data=data_list)
     chart = LineChart(data, options={'title': 'Payout History'})
