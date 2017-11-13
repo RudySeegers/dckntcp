@@ -290,7 +290,7 @@ def gen_payout_report(request, wallet, wallet_type):
 
     for tx in payout_history:
         total_reward += tx.amount
-        data_list.append([arktool.utils.arkt_to_datetime(tx.timestamp), tx.amount/arkinfo.ARK])
+        data_list.append([arktool.utils.arkt_to_datetime(tx.timestamp).strftime('%d/%m/%Y'), tx.amount/arkinfo.ARK])
         if tx.senderId in info.DELEGATE_DIC:
             sender_delegate = info.DELEGATE_DIC[tx.senderId]['username']
 
@@ -313,7 +313,7 @@ def gen_payout_report(request, wallet, wallet_type):
 
         payout_result.append(
             {'amount': tx.amount/arkinfo.ARK,
-             'time': arktool.utils.arkt_to_datetime(tx.timestamp),
+             'time': arktool.utils.arkt_to_datetime(tx.timestamp).strftime('%d/%m/%Y'),
              'share': share_p,
              'delegate': sender_delegate,
              })
