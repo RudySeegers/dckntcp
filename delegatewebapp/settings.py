@@ -165,7 +165,7 @@ LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'root': {
-        'level': 'WARNING',
+        'level': 'ERROR',
         'handlers': ['sentry'],
     },
     'formatters': {
