@@ -118,38 +118,38 @@ function fixBodyPadding(className) {
                        </a></li>
             </ul>
           </li>
-            <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="font-size: 300%">Oxycoin</a>
-            <ul class="dropdown-menu">
-              {% for wallet in oxywallets %}
-                <li><a href="#">{{ wallet }}</a></li>
-                {% endfor %}
-                <li role="separator" class="divider"></li>
-                <li class="dropdown-header"></li>
-                <li><a href="{% url 'console_update' %}#oxy">{% if not oxywallets %}
-                    add wallet
-                       {% else %}
-                    configure wallets
-                 {% endif %}
-                       </a></li>
-            </ul>
-          </li>
-            <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="font-size: 300%">Shift</a>
-            <ul class="dropdown-menu">
-              {% for wallet in shiftwallets %}
-                <li><a href="#">{{ wallet }}</a></li>
-              {% endfor %}
-                <li role="separator" class="divider"></li>
-                <li class="dropdown-header"></li>
-                <li><a href="{% url 'console_update' %}#shift">{% if not shiftwallets %}
-                    add wallet
-                       {% else %}
-                    configure wallets
-                 {% endif %}
-                       </a></li>
-            </ul>
-          </li>
+{#            <li class="dropdown">#}
+{#            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="font-size: 300%">Oxycoin</a>#}
+{#            <ul class="dropdown-menu">#}
+{#              {% for wallet in oxywallets %}#}
+{#                <li><a href="#">{{ wallet }}</a></li>#}
+{#                {% endfor %}#}
+{#                <li role="separator" class="divider"></li>#}
+{#                <li class="dropdown-header"></li>#}
+{#                <li><a href="{% url 'console_update' %}#oxy">{% if not oxywallets %}#}
+{#                    add wallet#}
+{#                       {% else %}#}
+{#                    configure wallets#}
+{#                 {% endif %}#}
+{#                       </a></li>#}
+{#            </ul>#}
+{#          </li>#}
+{#            <li class="dropdown">#}
+{#            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="font-size: 300%">Shift</a>#}
+{#            <ul class="dropdown-menu">#}
+{#              {% for wallet in shiftwallets %}#}
+{#                <li><a href="#">{{ wallet }}</a></li>#}
+{#              {% endfor %}#}
+{#                <li role="separator" class="divider"></li>#}
+{#                <li class="dropdown-header"></li>#}
+{#                <li><a href="{% url 'console_update' %}#shift">{% if not shiftwallets %}#}
+{#                    add wallet#}
+{#                       {% else %}#}
+{#                    configure wallets#}
+{#                 {% endif %}#}
+{#                       </a></li>#}
+{#            </ul>#}
+{#          </li>#}
         </ul>
       </div>
     </div>
