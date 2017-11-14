@@ -389,7 +389,7 @@ def gen_payout_report(request, wallet, wallet_type):
         'height': height,
         'info': None,
         'status': status,
-        'builduppayout': builduppayout/arkinfo.ARK,
+        'builduppayout': 'Ѧ' + str(builduppayout/arkinfo.ARK),
         'error': False,
         })
 
