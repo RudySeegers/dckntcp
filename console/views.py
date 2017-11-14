@@ -29,7 +29,6 @@ def sidebar_context(request):
 
     arkreceivemain = current_user.user.receiving_ark_address
     arkreceivemaintag = current_user.user.receiving_ark_address_tag
-    logger.critical('{0}, {1}, {2}, {3}'.format(arkmainwallet, arkmaintag, arkreceivemain, arkreceivemaintag))
 
     context = {
         'arkmainwallet': arkmainwallet,
@@ -292,6 +291,7 @@ def gen_balance_report(request, wallet):
                 'wallet': wallet})
     return res
 
+
 @login_required(login_url='/login/')
 def gen_payout_report(request, wallet, wallet_type):
     res = {}
@@ -312,7 +312,6 @@ def gen_payout_report(request, wallet, wallet_type):
         payout_history = arktool.Address.payout(wallet)
         last_vote = arktool.Address.votes(wallet)[0]
         height = arktool.Node.height()
-        logger.info('balance {0}  payout_history {1}   lastvote {2}   height  {3}'.format(balance, payout_history, last_vote, height))
     except Exception:
         logger.exception('error in obtaining ark-data in gen_payout_report')
         return res
@@ -392,7 +391,6 @@ def gen_payout_report(request, wallet, wallet_type):
         'builduppayout': 'Ѧ' + str(builduppayout/arkinfo.ARK),
         'error': False,
         })
-
     return res
 
 

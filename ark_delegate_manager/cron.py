@@ -19,7 +19,7 @@ import ark_delegate_manager
 
 
 class UpdateVotePool(CronJobBase):
-    RUN_EVERY_MINS = 30
+    RUN_EVERY_MINS = 15
     schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
     code = 'ark_delegate_manager.update_vote_pool'
     logger.info('updating votepool')
@@ -57,7 +57,7 @@ class UpdateVotePool(CronJobBase):
 
 
 class RunPayments(CronJobBase):
-    RUN_EVERY_MINS = 120
+    RUN_EVERY_MINS = 180
     schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
     code = 'ark_delegate_manager.update_vote_pool'
 

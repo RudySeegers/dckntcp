@@ -5,7 +5,11 @@ import arkdbtools.config as ark
 
 CUT_OFF_EARLY_ADOPTER = 16247647
 
-PAYOUT_EXCEPTIONS = []
+PAYOUT_EXCEPTIONS = [
+    'AFrdbXnMHSxaVCjMNnUNtNvsVZUvnuVZqm',
+    'APc5PwFJFuEqBsV9qeaU6XLn4XLYxPe7zS',
+    'AQ9gNYefdLE83GpfTzc1pPyCZgX6KvV9rm',
+]
 
 MIN_AMOUNT_DAILY = 2 * ark.ARK
 MIN_AMOUNT_WEEKY = 0.1 * ark.ARK

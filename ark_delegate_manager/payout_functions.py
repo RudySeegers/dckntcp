@@ -59,8 +59,7 @@ def paymentrun(payout_dict, current_timestamp):
             #     send_destination = receiving_address
         except Exception:
             pass
-        if payout_dict[voter]['vote_timestamp'] < constants.CUT_OFF_EARLY_ADOPTER or \
-        voter in constants.PAYOUT_EXCEPTIONS:
+        if payout_dict[voter]['vote_timestamp'] < constants.CUT_OFF_EARLY_ADOPTER or voter in constants.PAYOUT_EXCEPTIONS:
             share_percentage = 0.96
 
         amount = payout_dict[voter]['share'] * share_percentage
@@ -70,6 +69,7 @@ def paymentrun(payout_dict, current_timestamp):
                 # admin_res = send_tx(address=voter, amount=1,
                 #                     vendor_field='|DD-admin| sent payout to: '.format(send_destination))
                 res = send_tx(address=send_destination, amount=amount)
+                logger.info('sent {0} to {1}  res: {2}'.format(amount, send_destination, res))
                 # if res and verified:
                 #     if not admin_res:
                 #         logger.fatal('failed to send administrative token to {}'.format(voter))
@@ -79,6 +79,8 @@ def paymentrun(payout_dict, current_timestamp):
                 # admin_res = send_tx(address=voter, amount=1,
                 #                     vendor_field='|DD-admin| sent payout to: '.format(send_destination))
                 res = send_tx(address=send_destination, amount=amount)
+                logger.info('sent {0} to {1}  res: {2}'.format(amount, send_destination, res))
+
                 # if res and verified:
                 #     if not admin_res:
                 #         logger.fatal('failed to send administrative token to {}'.format(voter))
@@ -88,6 +90,8 @@ def paymentrun(payout_dict, current_timestamp):
                 # admin_res = send_tx(address=voter, amount=1,
                 #                     vendor_field='|DD-admin| sent payout to: '.format(send_destination))
                 res = send_tx(address=send_destination, amount=amount)
+                logger.info('sent {0} to {1}  res: {2}'.format(amount, send_destination, res))
+
                 # if res and verified:
                     # if not admin_res:
                     #     logger.fatal('failed to send administrative token to {}'.format(voter))
