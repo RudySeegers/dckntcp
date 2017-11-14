@@ -324,20 +324,18 @@ def gen_payout_report(request, wallet, wallet_type):
     else:
         delegate = None
 
-    if delegate == 'dutchdelegate' and wallet_type == 'main_ark':
-            try:
-                builduppayout = ark_delegate_manager.models.VotePool.objects.get(ark_address=wallet).payout_amount
-            except Exception:
-                pass
-    else:
-        builduppayout = None
+    builduppayout = 0
+    try:
+        builduppayout = ark_delegate_manager.models.VotePool.objects.get(ark_address=wallet).payout_amount
+    except Exception:
+        pass
+
 
     # initialize some variables
     total_reward = 0
     payout_result = []
     share_p = 'not available'
     data_list = [['date', 'Payout amount']]
-    builduppayout = 0
 
     for tx in payout_history:
         total_reward += tx.amount
@@ -391,7 +389,7 @@ def gen_payout_report(request, wallet, wallet_type):
         'height': height,
         'info': None,
         'status': status,
-        'builduppayout': builduppayout,
+        'builduppayout': builduppayout/arkinfo.ARK,
         'error': False,
         })
 
