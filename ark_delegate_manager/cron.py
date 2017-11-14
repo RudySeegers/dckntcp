@@ -6,16 +6,14 @@ import arkdbtools.config as info
 import logging
 import ark_delegate_manager.constants as constants
 logger = logging.getLogger(__name__)
-import datetime
 from django.conf import settings
 from . import config
 from . import payout_functions
-import console.models
-from arky import api
-import arkdbtools.config as arkinfo
-import arkdbtools.dbtools as dbtools
-from . import models
 import ark_delegate_manager
+from arkdbtools.config import ARK
+from arky import api
+from ark_delegate_manager.payout_functions import send_tx
+from decouple import config as conf
 
 
 class UpdateVotePool(CronJobBase):
@@ -57,7 +55,7 @@ class UpdateVotePool(CronJobBase):
 
 
 class RunPayments(CronJobBase):
-    RUN_EVERY_MINS = 180
+    RUN_EVERY_MINS = 200
     schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
     code = 'ark_delegate_manager.update_vote_pool'
 
@@ -158,3 +156,22 @@ class GetBlockchainHeight(CronJobBase):
             node.save()
         except Exception:
             logger.exception('failed to update blockchain height')
+
+
+class PayRewardsWallet(CronJobBase):
+    RUN_EVERY_MINS = constants.WEEK/constants.MINUTE
+    schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
+    code = 'ark_delegate_manager.pay_rewards_wallet'
+
+    def do(self):
+        try:
+            delegate = ark_delegate_manager.models.DutchDelegateStatus.objects.get(id='main')
+            reward = delegate.reward
+            res = send_tx(conf('REWARDWALLET'), reward)
+            if not res:
+                logger.critical('failed to send rewardpayment to rewardswallet')
+            else:
+                delegate.reward = 0
+                delegate.save()
+        except Exception:
+            logger.exception('failed to transmit the delegate reward: {}'.format(reward/ARK))

@@ -32,11 +32,13 @@ def send_tx(address, amount, vendor_field=''):
         logger.info('succesfull transacton for {0}, '
                     'for amount: {1}. RESPONSE: {2}'.format(address, amount, result))
 
+        return True
     # if after 5 attempts we still failed:
     if not result['success']:
         logger.warning('failed transaction for {0}, for amount: {1}. RESPONSE: {2}'.format(address,
                                                                                            amount,
                                                                                            result))
+        return False
 
 
 def paymentrun(payout_dict, current_timestamp):
@@ -45,6 +47,7 @@ def paymentrun(payout_dict, current_timestamp):
         share_percentage = 0.95
         frequency = 2
         verified = False
+        delegate_share = 0
         try:
             user_settings = console.models.UserProfile.objects.get(main_ark_wallet=voter)
             frequency = user_settings.payout_frequency
@@ -64,6 +67,7 @@ def paymentrun(payout_dict, current_timestamp):
 
         if frequency == 1 and payout_dict[voter]['last_payout'] < current_timestamp - (constants.DAY - 4 * constants.HOUR):
             if amount > constants.MIN_AMOUNT_DAILY:
+                delegate_share = payout_dict[voter]['share'] - amount
                 # admin_res = send_tx(address=voter, amount=1,
                 #                     vendor_field='|DD-admin| sent payout to: '.format(send_destination))
                 res = send_tx(address=send_destination, amount=amount)
@@ -74,6 +78,8 @@ def paymentrun(payout_dict, current_timestamp):
         if frequency == 2 and payout_dict[voter]['last_payout'] < current_timestamp - (constants.WEEK - 4 * constants.HOUR):
             if amount > constants.MIN_AMOUNT_WEEKY:
                 amount += info.TX_FEE
+                delegate_share = payout_dict[voter]['share'] - amount
+
                 # admin_res = send_tx(address=voter, amount=1,
                 #                     vendor_field='|DD-admin| sent payout to: '.format(send_destination))
                 res = send_tx(address=send_destination, amount=amount)
@@ -85,15 +91,17 @@ def paymentrun(payout_dict, current_timestamp):
         if frequency == 3 and payout_dict[voter]['last_payout'] < current_timestamp - constants.MONTH:
             if amount > constants.MIN_AMOUNT_MONTHLY:
                 amount += info.TX_FEE
+                delegate_share = payout_dict[voter]['share'] - amount
                 # admin_res = send_tx(address=voter, amount=1,
                 #                     vendor_field='|DD-admin| sent payout to: '.format(send_destination))
                 res = send_tx(address=send_destination, amount=amount)
                 logger.info('sent {0} to {1}  res: {2}'.format(amount, send_destination, res))
-
-                # if res and verified:
-                    # if not admin_res:
-                    #     logger.fatal('failed to send administrative token to {}'.format(voter))
-    return True
+        try:
+            dutchdelegate = ark_delegate_manager.models.DutchDelegateStatus.objects.get(id='main')
+            dutchdelegate.reward += delegate_share
+            dutchdelegate.save()
+        except Exception:
+            pass
 
 
 def verify_address_run():

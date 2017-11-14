@@ -209,9 +209,10 @@ LOGGING = {
 CRON_CLASSES = [
     "ark_delegate_manager.cron.UpdateVotePool",
     "ark_delegate_manager.cron.RunPayments",
-    "ark_delegate_manager.cron.VerifyReceivingArkAddresses",
+    # "ark_delegate_manager.cron.VerifyReceivingArkAddresses",
     "ark_delegate_manager.cron.UpdateDutchDelegateStatus",
-    "ark_delegate_manager.cron.UpdateDelegates"
+    "ark_delegate_manager.cron.UpdateDelegates",
+    "ark_delegate_manager.cron.PayRewardsWallet",
 ]
 
 MEDIA_ROOT = PROJECT_PATH + '/media/'
