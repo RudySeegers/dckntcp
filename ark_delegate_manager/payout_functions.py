@@ -42,7 +42,11 @@ def send_tx(address, amount, vendor_field=''):
 
 
 def paymentrun(payout_dict, current_timestamp):
+    failed_transactions = 0
+    succesful_transactions = 0
+
     for voter in payout_dict:
+
         send_destination = voter
         share_percentage = 0.95
         frequency = 2
@@ -71,7 +75,11 @@ def paymentrun(payout_dict, current_timestamp):
                 # admin_res = send_tx(address=voter, amount=1,
                 #                     vendor_field='|DD-admin| sent payout to: '.format(send_destination))
                 res = send_tx(address=send_destination, amount=amount)
-                logger.info('sent {0} to {1}  res: {2}'.format(amount, send_destination, res))
+                if res:
+                    succesful_transactions += 1
+                    logger.info('sent {0} to {1}  res: {2}'.format(amount, send_destination, res))
+                else:
+                    failed_transactions += 1
                 # if res and verified:
                 #     if not admin_res:
                 #         logger.fatal('failed to send administrative token to {}'.format(voter))
@@ -83,7 +91,11 @@ def paymentrun(payout_dict, current_timestamp):
                 # admin_res = send_tx(address=voter, amount=1,
                 #                     vendor_field='|DD-admin| sent payout to: '.format(send_destination))
                 res = send_tx(address=send_destination, amount=amount)
-                logger.info('sent {0} to {1}  res: {2}'.format(amount, send_destination, res))
+                if res:
+                    succesful_transactions += 1
+                    logger.info('sent {0} to {1}  res: {2}'.format(amount, send_destination, res))
+                else:
+                    failed_transactions += 1
 
                 # if res and verified:
                 #     if not admin_res:
@@ -95,13 +107,19 @@ def paymentrun(payout_dict, current_timestamp):
                 # admin_res = send_tx(address=voter, amount=1,
                 #                     vendor_field='|DD-admin| sent payout to: '.format(send_destination))
                 res = send_tx(address=send_destination, amount=amount)
-                logger.info('sent {0} to {1}  res: {2}'.format(amount, send_destination, res))
+                if res:
+                    succesful_transactions += 1
+                    logger.info('sent {0} to {1}  res: {2}'.format(amount, send_destination, res))
+                else:
+                    failed_transactions += 1
         try:
             dutchdelegate = ark_delegate_manager.models.DutchDelegateStatus.objects.get(id='main')
             dutchdelegate.reward += delegate_share
             dutchdelegate.save()
         except Exception:
             pass
+    if failed_transactions:
+        logger.critical('sent {0} transactions, failed {1} transactions'.format(succesful_transactions, failed_transactions))
 
 
 def verify_address_run():
