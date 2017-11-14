@@ -65,6 +65,7 @@ class RunPayments(CronJobBase):
         try:
             logger.critical('starting payment run')
 
+            # if we are in test mode we don't care about our node status
             if not ark_node.Node.check_node(51) and settings.DEBUG == False:
                 logger.fatal('Node is more than 51 blocks behind')
                 return

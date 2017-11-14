@@ -31,14 +31,12 @@ def send_tx(address, amount, vendor_field=''):
     if result['success']:
         logger.info('succesfull transacton for {0}, '
                     'for amount: {1}. RESPONSE: {2}'.format(address, amount, result))
-        return True
 
     # if after 5 attempts we still failed:
     if not result['success']:
         logger.warning('failed transaction for {0}, for amount: {1}. RESPONSE: {2}'.format(address,
                                                                                            amount,
                                                                                            result))
-    return False
 
 
 def paymentrun(payout_dict, current_timestamp):
@@ -64,7 +62,7 @@ def paymentrun(payout_dict, current_timestamp):
 
         amount = payout_dict[voter]['share'] * share_percentage
 
-        if frequency == 1 and payout_dict[voter]['last_payout'] < current_timestamp - constants.DAY:
+        if frequency == 1 and payout_dict[voter]['last_payout'] < current_timestamp - (constants.DAY - 4 * constants.HOUR):
             if amount > constants.MIN_AMOUNT_DAILY:
                 # admin_res = send_tx(address=voter, amount=1,
                 #                     vendor_field='|DD-admin| sent payout to: '.format(send_destination))
@@ -73,7 +71,7 @@ def paymentrun(payout_dict, current_timestamp):
                 # if res and verified:
                 #     if not admin_res:
                 #         logger.fatal('failed to send administrative token to {}'.format(voter))
-        if frequency == 2 and payout_dict[voter]['last_payout'] < current_timestamp - constants.WEEK:
+        if frequency == 2 and payout_dict[voter]['last_payout'] < current_timestamp - (constants.WEEK - 4 * constants.HOUR):
             if amount > constants.MIN_AMOUNT_WEEKY:
                 amount += info.TX_FEE
                 # admin_res = send_tx(address=voter, amount=1,

@@ -15,8 +15,7 @@ from delegatewebapp.tokens import gen_ark_token, gen_kapu_token
 from . import config
 import arkdbtools.dbtools as arktool
 import arkdbtools.config as arkinfo
-from django.core.exceptions import ObjectDoesNotExist
-
+import ark_delegate_manager.constants
 logger = logging.getLogger(__name__)
 
 
@@ -367,7 +366,7 @@ def gen_payout_report(request, wallet, wallet_type):
              })
     payout_result.reverse()
 
-    if vote_timestamp < 16247647 and delegate == 'dutchdelegate' or wallet in info.EXCEPTIONS:
+    if vote_timestamp < 16247647 and delegate == 'dutchdelegate' or wallet in ark_delegate_manager.constants.PAYOUT_EXCEPTIONS:
         status = 'Early adopter'
     elif delegate == 'dutchdelegate':
         status = 'Active voter'

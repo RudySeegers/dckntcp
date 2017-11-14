@@ -149,6 +149,7 @@ ROOT_PATH = os.path.dirname(__file__)
 STATICFILES_DIRS = [os.path.join(ROOT_PATH, 'static')]
 STATIC_ROOT = "/var/www/dutchdelegate.nl/static/"
 
+
 LOGIN_REDIRECT_URL = '/home'
 
 EMAIL_USE_TLS = True
