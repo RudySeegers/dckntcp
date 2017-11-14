@@ -11,7 +11,7 @@ class UserProfile(models.Model):
     SENDER_CHOICES = ((1, 'Send payout second address'), (2, 'Send payout to voting address'))
     address = RegexValidator(r'A[0-9a-zA-Z]{33}$', 'Only valid address formats are allowed.')
     user = AutoOneToOneField(User, related_name='user', primary_key=True)
-    main_ark_wallet = models.CharField(max_length=34, blank=True, validators=[address], unique=True)
+    main_ark_wallet = models.CharField(max_length=34, blank=True, default='', validators=[address])
     main_ark_tag = models.CharField(max_length=34, blank=True, null=True)
     ark_send_to_second_address = models.IntegerField(choices=SENDER_CHOICES, default=2)
 
