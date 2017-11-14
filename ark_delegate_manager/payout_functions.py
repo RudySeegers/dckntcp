@@ -43,8 +43,9 @@ def send_tx(address, amount, vendor_field=''):
 
 def paymentrun(payout_dict, current_timestamp):
     failed_transactions = 0
+    failed_amount = 0
     succesful_transactions = 0
-
+    succesful_amount = 0
     for voter in payout_dict:
 
         send_destination = voter
@@ -77,9 +78,11 @@ def paymentrun(payout_dict, current_timestamp):
                 res = send_tx(address=send_destination, amount=amount)
                 if res:
                     succesful_transactions += 1
+                    succesful_amount += amount
                     logger.info('sent {0} to {1}  res: {2}'.format(amount, send_destination, res))
                 else:
                     failed_transactions += 1
+                    failed_amount += amount
                 # if res and verified:
                 #     if not admin_res:
                 #         logger.fatal('failed to send administrative token to {}'.format(voter))
@@ -93,9 +96,11 @@ def paymentrun(payout_dict, current_timestamp):
                 res = send_tx(address=send_destination, amount=amount)
                 if res:
                     succesful_transactions += 1
+                    succesful_amount += amount
                     logger.info('sent {0} to {1}  res: {2}'.format(amount, send_destination, res))
                 else:
                     failed_transactions += 1
+                    failed_amount += amount
 
                 # if res and verified:
                 #     if not admin_res:
@@ -109,9 +114,11 @@ def paymentrun(payout_dict, current_timestamp):
                 res = send_tx(address=send_destination, amount=amount)
                 if res:
                     succesful_transactions += 1
+                    succesful_amount += amount
                     logger.info('sent {0} to {1}  res: {2}'.format(amount, send_destination, res))
                 else:
                     failed_transactions += 1
+                    failed_amount += amount
         try:
             dutchdelegate = ark_delegate_manager.models.DutchDelegateStatus.objects.get(id='main')
             dutchdelegate.reward += delegate_share
@@ -120,7 +127,7 @@ def paymentrun(payout_dict, current_timestamp):
             pass
     if failed_transactions:
         logger.critical('sent {0} transactions, failed {1} transactions'.format(succesful_transactions, failed_transactions))
-
+        logger.critical('amout successful: {0}, failed amount: {1}'.format(succesful_amount/info.ARK, failed_amount/info.ARK))
 
 def verify_address_run():
     ark_node.set_connection(
