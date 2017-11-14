@@ -70,13 +70,13 @@ def paymentrun(payout_dict, current_timestamp):
 
         amount = payout_dict[voter]['share'] * share_percentage
 
-        if frequency == 1 and payout_dict[voter]['last_payout'] < current_timestamp - (constants.DAY - 4 * constants.HOUR):
+        if frequency == 1 and payout_dict[voter]['last_payout'] < current_timestamp - (constants.DAY - 7 * constants.HOUR):
             if amount > constants.MIN_AMOUNT_DAILY:
-                delegate_share = payout_dict[voter]['share'] - amount
                 # admin_res = send_tx(address=voter, amount=1,
                 #                     vendor_field='|DD-admin| sent payout to: '.format(send_destination))
                 res = send_tx(address=send_destination, amount=amount)
                 if res:
+                    delegate_share = payout_dict[voter]['share'] - amount
                     succesful_transactions += 1
                     succesful_amount += amount
                     logger.info('sent {0} to {1}  res: {2}'.format(amount, send_destination, res))
@@ -89,12 +89,12 @@ def paymentrun(payout_dict, current_timestamp):
         if frequency == 2 and payout_dict[voter]['last_payout'] < current_timestamp - (constants.WEEK - 4 * constants.HOUR):
             if amount > constants.MIN_AMOUNT_WEEKY:
                 amount += info.TX_FEE
-                delegate_share = payout_dict[voter]['share'] - amount
 
                 # admin_res = send_tx(address=voter, amount=1,
                 #                     vendor_field='|DD-admin| sent payout to: '.format(send_destination))
                 res = send_tx(address=send_destination, amount=amount)
                 if res:
+                    delegate_share = payout_dict[voter]['share'] - amount
                     succesful_transactions += 1
                     succesful_amount += amount
                     logger.info('sent {0} to {1}  res: {2}'.format(amount, send_destination, res))
@@ -108,15 +108,16 @@ def paymentrun(payout_dict, current_timestamp):
         if frequency == 3 and payout_dict[voter]['last_payout'] < current_timestamp - constants.MONTH:
             if amount > constants.MIN_AMOUNT_MONTHLY:
                 amount += info.TX_FEE
-                delegate_share = payout_dict[voter]['share'] - amount
                 # admin_res = send_tx(address=voter, amount=1,
                 #                     vendor_field='|DD-admin| sent payout to: '.format(send_destination))
                 res = send_tx(address=send_destination, amount=amount)
                 if res:
+                    delegate_share = payout_dict[voter]['share'] - amount
                     succesful_transactions += 1
                     succesful_amount += amount
                     logger.info('sent {0} to {1}  res: {2}'.format(amount, send_destination, res))
                 else:
+
                     failed_transactions += 1
                     failed_amount += amount
         try:
