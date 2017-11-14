@@ -30,13 +30,13 @@ def send_tx(address, amount, vendor_field=''):
     result = arky.api.broadcast(tx)
     if result['success']:
         logger.info('succesfull transacton for {0}, '
-                    'for amount: {1}. RESPONSE: {2}'.format(address, amount, result))
+                    'for amount: {1}. RESPONSE: {2}'.format(address, amount/info.ARK, result))
 
         return True
     # if after 5 attempts we still failed:
     if not result['success']:
         logger.warning('failed transaction for {0}, for amount: {1}. RESPONSE: {2}'.format(address,
-                                                                                           amount,
+                                                                                           amount/info.ARK,
                                                                                            result))
         return False
 
