@@ -129,6 +129,7 @@ def paymentrun(payout_dict, current_timestamp):
         logger.critical('sent {0} transactions, failed {1} transactions'.format(succesful_transactions, failed_transactions))
         logger.critical('amout successful: {0}, failed amount: {1}'.format(succesful_amount/info.ARK, failed_amount/info.ARK))
 
+
 def verify_address_run():
     ark_node.set_connection(
         host=config.CONNECTION['HOST'],
