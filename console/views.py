@@ -19,8 +19,73 @@ import ark_delegate_manager.constants
 logger = logging.getLogger(__name__)
 
 
+def saved(request):
+    """ if a user has succefully changed settings, this page is displayed """
+    return render(request, 'console/saved.html')
+
+
+def not_saved(request):
+    """ if a user has not saved the page, this page is displayed """
+    return render(request, 'console/not_saved.html')
+
+
+@login_required()
+def edit_user(request):
+    """ used to render the wallet settings page"""
+    # request user pk
+    pk = request.user.pk
+
+    # querying the User object with pk
+    user = User.objects.get(pk=pk)
+
+    # prepopulate UserProfileForm with retrieved user values from above.
+    user_form = UserForm(instance=user)
+
+    # The sorcery begins from here, see explanation below
+    ProfileInlineFormset = inlineformset_factory(User, UserProfile,
+                                                 fields=('main_ark_tag',
+                                                         'main_ark_wallet',
+                                                         'payout_frequency',
+                                                         # 'receiving_ark_address',
+                                                         # 'receiving_ark_address_tag',
+                                                         # 'ark_send_to_second_address'
+                                                         ))
+    formset = ProfileInlineFormset(instance=user)
+    username = user
+
+    # Generate a verification token for receiving address verification
+    arktoken = gen_ark_token(username)
+    kaputoken = gen_kapu_token(username)
+
+    if request.user.is_authenticated() and request.user.id == user.id:
+        if request.method == "POST":
+            user_form = UserForm(request.POST, request.FILES, instance=user)
+            formset = ProfileInlineFormset(request.POST, request.FILES, instance=user)
+
+            if user_form.is_valid():
+                created_user = user_form.save(commit=False)
+                formset = ProfileInlineFormset(request.POST, request.FILES, instance=created_user)
+
+                if formset.is_valid():
+
+                    created_user.save()
+                    formset.save()
+                    return HttpResponseRedirect('/console/update/saved')
+
+        return render(request, "console/update2.html", {
+            "noodle": pk,
+            "noodle_form": user_form,
+            "formset": formset,
+            "arktoken": arktoken,
+            "kaputoken": kaputoken,
+        })
+    else:
+        raise PermissionDenied
+
+
 @login_required(login_url='/login/')
 def sidebar_context(request):
+    """ generates the initial context needed to render consolebase.html """
     current_user = User.objects.get(username=request.user.username)
 
     arkmainwallet = current_user.user.main_ark_wallet
@@ -40,12 +105,39 @@ def sidebar_context(request):
     return context
 
 
-def saved(request):
-    return render(request, 'console/saved.html')
+@login_required(login_url='/login/')
+def console_node(request):
+    """ renders the initial landing page of the console, displaying the
+    current delegates ran by dutchdelegate
 
+    also sets session variables """
+    context = sidebar_context(request)
+    dutchdelegateinfo = ark_delegate_manager.models.DutchDelegateStatus.objects.get(pk='main')
+    dutchdelegate_ark_rank = dutchdelegateinfo.rank
+    dutchdelegate_ark_productivity = dutchdelegateinfo.productivity
+    dutchdelegate_total_ark_voted = dutchdelegateinfo.ark_votes
+    dutchdelegatevoters = dutchdelegateinfo.voters
 
-def not_saved(request):
-    return render(request, 'console/not_saved.html')
+    context.update({
+        'dutchdelegaterank': dutchdelegate_ark_rank,
+        'totalarkvoted': dutchdelegate_total_ark_voted,
+        'totalvoters': dutchdelegatevoters,
+        'productivity': dutchdelegate_ark_productivity,
+        'first': True,
+        'error': False,
+    })
+
+    """setting some session statistics here"""
+    request.session['arkmainwallet'] = context['arkmainwallet']
+    request.session['arkmaintag'] = context['arkmaintag']
+    request.session['arksecwallet'] = context['arksecwallet']
+    request.session['arksectag'] = context['arksectag']
+
+    # this is used to determine what wallet to generate reports on.
+    # if None/not exists, arkmainwallet is used automatically
+    request.session['current_wallet_view'] = None
+
+    return render(request, "console/console_node.html", context)
 
 
 @login_required(login_url='/login/')
@@ -105,80 +197,6 @@ def console_wallet_history(request):
     context.update({'tx_dic': tx_dic,
                     'error': False})
     return render(request, 'console/console_wallet_statistics.html', context)
-
-
-@login_required()  # only logged in users should access this
-def edit_user(request):
-    # request user pk
-    pk = request.user.pk
-
-    # querying the User object with pk
-    user = User.objects.get(pk=pk)
-
-    # prepopulate UserProfileForm with retrieved user values from above.
-    user_form = UserForm(instance=user)
-
-    # The sorcery begins from here, see explanation below
-    ProfileInlineFormset = inlineformset_factory(User, UserProfile,
-                                                 fields=('main_ark_tag',
-                                                         'main_ark_wallet',
-                                                         'payout_frequency',
-                                                         # 'receiving_ark_address',
-                                                         # 'receiving_ark_address_tag',
-                                                         # 'ark_send_to_second_address'
-                                                         ))
-    formset = ProfileInlineFormset(instance=user)
-    username = user
-
-    # Generate a verification token for receiving address verification
-    arktoken = gen_ark_token(username)
-    kaputoken = gen_kapu_token(username)
-
-    if request.user.is_authenticated() and request.user.id == user.id:
-        if request.method == "POST":
-            user_form = UserForm(request.POST, request.FILES, instance=user)
-            formset = ProfileInlineFormset(request.POST, request.FILES, instance=user)
-
-            if user_form.is_valid():
-                created_user = user_form.save(commit=False)
-                formset = ProfileInlineFormset(request.POST, request.FILES, instance=created_user)
-
-                if formset.is_valid():
-
-                    created_user.save()
-                    formset.save()
-                    return HttpResponseRedirect('/console/update/saved')
-
-        return render(request, "console/update2.html", {
-            "noodle": pk,
-            "noodle_form": user_form,
-            "formset": formset,
-            "arktoken": arktoken,
-            "kaputoken": kaputoken,
-        })
-    else:
-        raise PermissionDenied
-
-
-@login_required(login_url='/login/')
-def console_node(request):
-    context = sidebar_context(request)
-    dutchdelegateinfo = ark_delegate_manager.models.DutchDelegateStatus.objects.get(pk='main')
-
-    dutchdelegate_ark_rank = dutchdelegateinfo.rank
-    dutchdelegate_ark_productivity = dutchdelegateinfo.productivity
-    dutchdelegate_total_ark_voted = dutchdelegateinfo.ark_votes
-    dutchdelegatevoters = dutchdelegateinfo.voters
-
-    context.update({
-        'dutchdelegaterank': dutchdelegate_ark_rank,
-        'totalarkvoted': dutchdelegate_total_ark_voted,
-        'totalvoters': dutchdelegatevoters,
-        'productivity': dutchdelegate_ark_productivity,
-        'first': True,
-        'error': False,
-    })
-    return render(request, "console/console_node.html", context)
 
 
 @login_required(login_url='/login/')
@@ -328,18 +346,22 @@ def gen_payout_report(request, wallet, wallet_type):
     except Exception:
         pass
 
-
     # initialize some variables
     total_reward = 0
     payout_result = []
     share_p = 'not available'
     data_list = [['date', 'Payout amount']]
+    sender_delegate = 'unknown delegate'
 
     for tx in payout_history:
         total_reward += tx.amount
         data_list.append([arktool.utils.arkt_to_datetime(tx.timestamp).strftime('%d/%m/%Y'), tx.amount/arkinfo.ARK])
-        if tx.senderId in info.DELEGATE_DIC:
-            sender_delegate = info.DELEGATE_DIC[tx.senderId]['username']
+
+        # this is a fast try, as in 99% of the cases tx.senderId is in the database
+        try:
+            sender_delegate = ark_delegate_manager.models.ArkDelegates.objects.get(address=tx.senderId)
+        except Exception:
+            pass
 
         # this works for all delegates
         if tx.senderId in info.PAYOUT_DICT:
