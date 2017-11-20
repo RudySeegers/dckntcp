@@ -195,6 +195,7 @@ def payout_report(request, ark_address):
         context['payout_history'][i]['timestamp'] = arktool.utils.arkt_to_datetime(context['payout_history'][i]['timestamp'])
         context['payout_history'][i]['amount'] = context['payout_history'][i]['amount'] / arkinfo.ARK
 
+    print(context['payout_history'])
     context['balance'] = context['balance'] / arkinfo.ARK
     context['builduppayout'] = context['balance'] / arkinfo.ARK
     context['total_stake_reward'] = context['total_stake_reward'] / arkinfo.ARK
