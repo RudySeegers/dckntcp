@@ -93,7 +93,7 @@ function fixBodyPadding(className) {
                 <li role="separator" class="divider"></li>
                 <li class="dropdown-header"></li>
                 <li><a href="{% url 'console_update' %}#ark">
-                 {% if not arkmainwallet %}
+                 {% if not request.user.arkmainwallet %}
                     add wallet
                        {% else %}
                     configure wallets
