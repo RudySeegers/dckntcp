@@ -214,6 +214,7 @@ def balance_report(request, ark_address):
     )
 
     context = sidebar_context(request)
+    context['error'] = False
     res = ark_analytics.analytic_functions.gen_balance_report(ark_address)
     context.update(res)
 
