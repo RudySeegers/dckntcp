@@ -237,7 +237,7 @@ def balance_report(request, ark_address):
             i['balance']
         ])
 
-
+    context['balance_over_time'].reverse()
     data = SimpleDataSource(data=data_list)
     chart = LineChart(data, options={'title': 'Balance History'})
     context.update({
