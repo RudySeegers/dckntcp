@@ -72,7 +72,8 @@
                     </tr>
                   </thead>
                   <tbody>
-                        {% for tx in payout_history %}
+                        {% for i in payout_history %}
+                            {% for tx in i %}
                      <tr>
                         <td>Ѧ{{ tx.amount }}</td>
                         <td>{{ tx.time }}</td>
@@ -80,6 +81,7 @@
                         <td>{{ tx.delegate }}</td>
                      </tr>
                         {% endfor %}
+                     {% endfor %}
                     {% else %}
 
                     {% endif %}

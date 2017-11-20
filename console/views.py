@@ -196,6 +196,9 @@ def payout_report(request, ark_address):
         context['payout_history'][i]['amount'] = context['payout_history'][i]['amount'] / arkinfo.ARK
 
     context['balance'] = context['balance'] / arkinfo.ARK
+    context['builduppayout'] = context['balance'] / arkinfo.ARK
+    context['total_stake_reward'] = context['total_stake_reward'] / arkinfo.ARK
+
     return render(request, "console/console_wallet_statistics.html", context)
 
 
@@ -227,6 +230,7 @@ def balance_report(request, ark_address):
             i['timestamp'].strftime('%d/%m/%Y'),
             i['balance']
         ])
+
 
     data = SimpleDataSource(data=data_list)
     chart = LineChart(data, options={'title': 'Balance History'})
