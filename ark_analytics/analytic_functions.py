@@ -71,13 +71,12 @@ def gen_payout_report(wallet):
                     share_percentage = 0.96
 
         payout_result.append({
-                {'amount': tx.amount,
-                 'timestamp': tx.timestamp,
-                 'share': share_percentage,
-                 'delegate': sender_delegate,
-                 'id': tx.id,
-                 }
-        })
+            'amount': tx.amount,
+            'timestamp': tx.timestamp,
+            'id': tx.id,
+            'share': share_percentage,
+            'delegate': sender_delegate,
+            })
 
     res.update({
         'succes': True,
