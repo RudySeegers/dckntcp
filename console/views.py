@@ -215,6 +215,7 @@ def balance_report(request, ark_address):
 
     context = sidebar_context(request)
     res = ark_analytics.analytic_functions.gen_balance_report(ark_address)
+    context.update(res)
 
     # generate a chart and format balances with appropriate units
     data_list = [['date', 'Balance']]
