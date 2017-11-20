@@ -8,9 +8,7 @@ from django.forms.models import inlineformset_factory
 from django.core.exceptions import PermissionDenied
 from graphos.renderers.gchart import LineChart
 from graphos.sources.simple import SimpleDataSource
-import datetime
 import logging
-from . import info
 from delegatewebapp.tokens import gen_ark_token, gen_kapu_token
 from . import config
 import arkdbtools.dbtools as arktool
