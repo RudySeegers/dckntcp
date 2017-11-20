@@ -244,7 +244,7 @@ def balance_report(request, ark_address):
         'chart': chart,
     })
 
-    return render(request, 'console/console_wallet_statistics.html', context)
+    return render(request, 'console/console_wallet_balance.html', context)
 
 
 @login_required(login_url='/login/')
