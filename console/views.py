@@ -192,8 +192,8 @@ def payout_report(request, ark_address):
 
     # converting context variables to correct units
     for i in context['payout_history']:
-        i['timestamp'] = arktool.utils.arkt_to_datetime(i['timestamp'])
-        i['amount'] = i['amount'] / arkinfo.ARK
+        context['payout_history'][i]['timestamp'] = arktool.utils.arkt_to_datetime(context['payout_history'][i]['timestamp'])
+        context['payout_history'][i]['amount'] = context['payout_history'][i]['amount'] / arkinfo.ARK
 
     context['balance'] = context['balance'] / arkinfo.ARK
     return render(request, "console/console_wallet_statistics.html", context)
