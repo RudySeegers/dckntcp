@@ -5,8 +5,8 @@
 {% block labelbar %}
 <div>
     <ul class="nav nav-tabs">
-        <li><a href="{% url 'console_payout_report_arkwalletmain'%}">Payout Report</a></li>
-        <li class="active"><a href="{% url 'console_balance_report_arkwalletmain' %}">Balance Report</a></li>
+        <li><a href="{% url 'console_payout_report' request.session.current_wallet%}">Payout Report</a></li>
+        <li class="active"><a href="{% url 'console_balance_report' request.session.current_wallet %}">Balance Report</a></li>
 {#        <li class="dropdown">#}
 {#        <a class="dropdown-toggle" data-toggle="dropdown" href="#">Analytics#}
 {#        <span class="caret"></span></a>#}
@@ -37,19 +37,19 @@
 
                 <div class="card card-block" style="width: 50rem;">
                     <h3 class="card-title">
-                        {% if wallettag %}
-                            {{ wallettag }}
+                        {% if request.session.current_tag %}
+                            {{ request.session.current_tag }}
                         {% else  %}
-                            {{ wallet }}
+                            {{ request.session.current_wallet }}
                         {% endif %}
                     </h3>
                     <ul style="list-style: none;">
-                    {% if wallettag %}
-                    <li><span class="text-muted">{{ wallet }}</span></li>
+                    {% if request.session.current_tag %}
+                    <li><span class="text-muted">{{ request.session.current_wallet }}</span></li>
                     {% endif %}
-                    <li><span class="text-muted">Total staking reward: : {{ stakeamount }}</span></li>
+                    <li><span class="text-muted">Total staking reward: : {{ total_stake_reward }}</span></li>
                     </ul>
-                    <a href="https://explorer.ark.io/address/{{ wallet }}" class="btn btn-primary">Explorer</a>
+                    <a href="https://explorer.ark.io/address/{{ request.session.current_wallet }}" class="btn btn-primary">Explorer</a>
                 </div>
               </div>
               <div class="table-responsive container">
@@ -61,7 +61,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                        {% for balance in balances %}
+                        {% for balance in balance_over_time %}
                      <tr>
                         <td>{{ balance.timestamp }}</td>
                         <td>Ѧ{{ balance.balance }}</td>
