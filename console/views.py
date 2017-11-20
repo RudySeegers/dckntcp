@@ -220,11 +220,11 @@ def balance_report(request, ark_address):
     # generate a chart and format balances with appropriate units
     data_list = [['date', 'Balance']]
     for i in res['balance_over_time']:
-        context['balance_over_time'][i]['timestamp'] = arktool.utils.arkt_to_datetime(context['balance_over_time'][i]['timestamp'])
-        context['balance_over_time'][i]['amount'] = context['balance_over_time'][i]['amount'] / arkinfo.ARK
+        i['timestamp'] = arktool.utils.arkt_to_datetime(i['timestamp'])
+        i['amount'] = i['amount'] / arkinfo.ARK
         data_list.append([
-            context['balance_over_time'][i]['timestamp'].strftime('%d/%m/%Y'),
-            context['balance_over_time'][i]['amount']
+            i['timestamp'].strftime('%d/%m/%Y'),
+            i['amount']
         ])
 
     data = SimpleDataSource(data=data_list)
