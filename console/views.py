@@ -195,7 +195,7 @@ def payout_report(request, ark_address):
         i['time'] = arktool.utils.arkt_to_datetime(i['timestamp'])
         i['amount'] = i['amount'] / arkinfo.ARK
         if i['share']:
-            i['share'] = i['share'] * 100
+            i['share'] = str(i['share'] * 100) + '%'
         else:
             i['share'] = 'Not available'
 
@@ -229,11 +229,11 @@ def balance_report(request, ark_address):
 
     # generate a chart and format balances with appropriate units
     data_list = [['date', 'Balance']]
-    for i in res['balance_over_time']:
-        i['timestamp'] = arktool.utils.arkt_to_datetime(i['timestamp'])
+    for i in context['balance_over_time']:
+        i['time'] = arktool.utils.arkt_to_datetime(i['timestamp'])
         i['balance'] = i['balance'] / arkinfo.ARK
         data_list.append([
-            i['timestamp'].strftime('%d/%m/%Y'),
+            i['time'].strftime('%d/%m/%Y'),
             i['balance']
         ])
 
