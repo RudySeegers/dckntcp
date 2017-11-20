@@ -34,8 +34,9 @@ def gen_payout_report(wallet):
             vote_timestamp = last_vote.timestamp
         else:
             delegate = None
+            vote_timestamp = None
     except IndexError:
-        last_vote = None
+        vote_timestamp = None
         delegate = None
 
 
@@ -61,7 +62,7 @@ def gen_payout_report(wallet):
                     share_percentage = info.PAYOUT_DICT[tx.senderId][t]
 
         # for dutchdelegate voters'
-        if sender_delegate == 'dutchdelegate':
+        if sender_delegate == 'dutchdelegate' and vote_timestamp:
             for t in info.PAYOUT_DICT['AZse3vk8s3QEX1bqijFb21aSBeoF6vqLYE']:
                 if tx.timestamp < t:
                     share_percentage = info.PAYOUT_DICT[tx.senderId][t]
