@@ -17,7 +17,7 @@ import arkdbtools.dbtools as arktool
 import arkdbtools.config as arkinfo
 import ark_delegate_manager.constants
 import ark_analytics.analytic_functions
-
+import django.core.exceptions as django_exceptions
 logger = logging.getLogger(__name__)
 
 
@@ -156,10 +156,12 @@ def payout_report(request, ark_address):
 
     res = ark_analytics.analytic_functions.gen_payout_report(ark_address)
     context.update(res)
-
-    voter = ark_delegate_manager.models.VotePool.objects.get(ark_address=ark_address)
-    builduppayout = voter.payout_amount
-    context.update({'builduppayout': builduppayout})
+    try:
+        voter = ark_delegate_manager.models.VotePool.objects.get(ark_address=ark_address)
+        builduppayout = voter.payout_amount
+        context.update({'builduppayout': builduppayout})
+    except django_exceptions.ObjectDoesNotExist:
+        pass
 
     data_list = [['date', 'Payout Amount']]
     for i in context['payout_history']:
