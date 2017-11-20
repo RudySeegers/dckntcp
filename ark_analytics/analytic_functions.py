@@ -51,7 +51,7 @@ def gen_payout_report(wallet):
 
         # this is a fast try, as in 99% of the cases tx.senderId is in the database
         try:
-            sender_delegate = ark_delegate_manager.models.ArkDelegates.objects.get(address=tx.senderId)
+            sender_delegate = ark_delegate_manager.models.ArkDelegates.objects.get(address=tx.senderId).username
         except Exception:
             pass
 
