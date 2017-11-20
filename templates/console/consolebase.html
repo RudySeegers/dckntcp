@@ -79,21 +79,21 @@ function fixBodyPadding(className) {
           <li class="dropdown" style="border-top: 1px solid white">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="font-size: 300%">ARK</a>
             <ul class="dropdown-menu">
-            {% if request.user.arkmaintag %}
-                <li><a href="{% url 'console_payout_report' request.user.arkmainwallet %}"> {{request.user.arkmaintag}} </a></li>
-            {% elif request.user.arkmainwallet %}
-                <li><a href="{% url 'console_payout_report' request.user.arkmainwallet %}"> {{request.user.arkmainwallet}} </a></li>
+            {% if request.session.arkmaintag %}
+                <li><a href="{% url 'console_payout_report' request.session.arkmainwallet %}"> {{request.session.arkmaintag}} </a></li>
+            {% elif request.session.arkmainwallet %}
+                <li><a href="{% url 'console_payout_report' request.session.arkmainwallet %}"> {{request.session.arkmainwallet}} </a></li>
             {% endif %}
-            {% if request.user.arksectag %}
-                <li><a href="{% url 'console_payout_report' request.user.arksecwallet %}"> {{request.user.arksectag}} </a></li>
+            {% if request.session.arksectag %}
+                <li><a href="{% url 'console_payout_report' request.session.arksecwallet %}"> {{request.session.arksectag}} </a></li>
             {% elif  request.user.arksecwallet%}
-                <li><a href="{% url 'console_payout_report' request.user.arksecwallet%}"> {{request.user.arksecwallet}} </a></li>
+                <li><a href="{% url 'console_payout_report' request.session.arksecwallet%}"> {{request.session.arksecwallet}} </a></li>
             {% endif %}
 
                 <li role="separator" class="divider"></li>
                 <li class="dropdown-header"></li>
                 <li><a href="{% url 'console_update' %}#ark">
-                 {% if not request.user.arkmainwallet %}
+                 {% if not request.session.arkmainwallet %}
                     add wallet
                        {% else %}
                     configure wallets
