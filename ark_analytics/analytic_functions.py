@@ -111,15 +111,15 @@ def gen_balance_report(wallet):
     balances = []
     for balance in balance_over_time:
         balances.append({
-            'timestamp': arktool.utils.arkt_to_datetime(balance.timestamp),
-            'balance': balance.amount/arkinfo.ARK
+            'timestamp': balance.timestamp,
+            'balance': balance.amount
         })
 
     stake_amount = 0
 
     payouts = arktool.Address.payout(wallet)
     for i in payouts:
-        stake_amount += i.amount/arkinfo.ARK
+        stake_amount += i.amount
 
     height = arktool.Node.height()
 
