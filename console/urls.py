@@ -6,8 +6,8 @@ urlpatterns = [
     url(r'^$', views.console_node, name='console_node'),
     url(r'^update/saved/$', views.saved, name='saved'),
     url(r'^update/not_saved/$', views.not_saved, name='not_saved'),
-    url(r'^wallet/(?P<ark_address>[\w.@+-]+)/payoutreport$', views.payout_report, name='console_payout_report'),
-    url(r'^wallet/(?P<ark_address>[\w.@+-]+)/balancereport$', views.balance_report, name='console_balance_report'),
+    url(r'^/payoutreport/@(?P<ark_address>[\w.@+-]+)$', views.payout_report, name='console_payout_report'),
+    url(r'^/balancereport/@(?P<ark_address>[\w.@+-]+)$', views.balance_report, name='console_balance_report'),
 
     url(r'^arkdelegatereport/$', views.delegate_report, name='console_ark_delegate_report'),
 
