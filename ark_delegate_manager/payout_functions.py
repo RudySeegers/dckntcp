@@ -70,8 +70,9 @@ def paymentrun(payout_dict, current_timestamp):
 
         amount = payout_dict[voter]['share'] * share_percentage
 
-        if frequency == 1 and payout_dict[voter]['last_payout'] < current_timestamp - (constants.DAY - 7 * constants.HOUR):
+        if frequency == 1 and payout_dict[voter]['last_payout'] < current_timestamp - (constants.DAY - 5 * constants.HOUR):
             if amount > constants.MIN_AMOUNT_DAILY:
+                amount -= info.TX_FEE
                 # admin_res = send_tx(address=voter, amount=1,
                 #                     vendor_field='|DD-admin| sent payout to: '.format(send_destination))
                 res = send_tx(address=send_destination, amount=amount)
@@ -86,9 +87,8 @@ def paymentrun(payout_dict, current_timestamp):
                 # if res and verified:
                 #     if not admin_res:
                 #         logger.fatal('failed to send administrative token to {}'.format(voter))
-        if frequency == 2 and payout_dict[voter]['last_payout'] < current_timestamp - (constants.WEEK - 4 * constants.HOUR):
+        if frequency == 2 and payout_dict[voter]['last_payout'] < current_timestamp - (constants.WEEK - 5 * constants.HOUR):
             if amount > constants.MIN_AMOUNT_WEEKY:
-                amount += info.TX_FEE
 
                 # admin_res = send_tx(address=voter, amount=1,
                 #                     vendor_field='|DD-admin| sent payout to: '.format(send_destination))
@@ -107,7 +107,6 @@ def paymentrun(payout_dict, current_timestamp):
                 #         logger.fatal('failed to send administrative token to {}'.format(voter))
         if frequency == 3 and payout_dict[voter]['last_payout'] < current_timestamp - constants.MONTH:
             if amount > constants.MIN_AMOUNT_MONTHLY:
-                amount += info.TX_FEE
                 # admin_res = send_tx(address=voter, amount=1,
                 #                     vendor_field='|DD-admin| sent payout to: '.format(send_destination))
                 res = send_tx(address=send_destination, amount=amount)
