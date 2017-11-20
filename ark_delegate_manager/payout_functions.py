@@ -46,6 +46,7 @@ def paymentrun(payout_dict, current_timestamp):
     failed_amount = 0
     succesful_transactions = 0
     succesful_amount = 0
+    vendorfield = ark_delegate_manager.models.DutchDelegateStatus.objects.get(id='main').vendorfield
     for voter in payout_dict:
 
         send_destination = voter
@@ -53,6 +54,7 @@ def paymentrun(payout_dict, current_timestamp):
         frequency = 2
         verified = False
         delegate_share = 0
+        payout_exceptions = ark_delegate_manager.models.EarlyAdopterExceptions.objects.all().values_list()
         try:
             user_settings = console.models.UserProfile.objects.get(main_ark_wallet=voter)
             frequency = user_settings.payout_frequency
@@ -65,7 +67,7 @@ def paymentrun(payout_dict, current_timestamp):
             #     send_destination = receiving_address
         except Exception:
             pass
-        if payout_dict[voter]['vote_timestamp'] < constants.CUT_OFF_EARLY_ADOPTER or voter in constants.PAYOUT_EXCEPTIONS:
+        if payout_dict[voter]['vote_timestamp'] < constants.CUT_OFF_EARLY_ADOPTER or voter in payout_exceptions:
             share_percentage = 0.96
 
         amount = payout_dict[voter]['share'] * share_percentage
@@ -75,7 +77,7 @@ def paymentrun(payout_dict, current_timestamp):
                 amount -= info.TX_FEE
                 # admin_res = send_tx(address=voter, amount=1,
                 #                     vendor_field='|DD-admin| sent payout to: '.format(send_destination))
-                res = send_tx(address=send_destination, amount=amount)
+                res = send_tx(address=send_destination, amount=amount, vendor_field=vendorfield)
                 if res:
                     delegate_share = payout_dict[voter]['share'] - amount
                     succesful_transactions += 1
@@ -92,7 +94,7 @@ def paymentrun(payout_dict, current_timestamp):
 
                 # admin_res = send_tx(address=voter, amount=1,
                 #                     vendor_field='|DD-admin| sent payout to: '.format(send_destination))
-                res = send_tx(address=send_destination, amount=amount)
+                res = send_tx(address=send_destination, amount=amount, vendor_field=vendorfield)
                 if res:
                     delegate_share = payout_dict[voter]['share'] - amount
                     succesful_transactions += 1
@@ -109,7 +111,7 @@ def paymentrun(payout_dict, current_timestamp):
             if amount > constants.MIN_AMOUNT_MONTHLY:
                 # admin_res = send_tx(address=voter, amount=1,
                 #                     vendor_field='|DD-admin| sent payout to: '.format(send_destination))
-                res = send_tx(address=send_destination, amount=amount)
+                res = send_tx(address=send_destination, amount=amount, vendor_field=vendorfield)
                 if res:
                     delegate_share = payout_dict[voter]['share'] - amount
                     succesful_transactions += 1

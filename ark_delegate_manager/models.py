@@ -20,6 +20,7 @@ class DutchDelegateStatus(models.Model):
     voters = models.IntegerField(default=0)
     productivity = models.FloatField(default=100)
     reward = models.IntegerField(default=0)
+    vendorfield = models.CharField(max_length=64, default='Thank you for voting.')
 
 
 class EarlyAdopterExceptions(models.Model):

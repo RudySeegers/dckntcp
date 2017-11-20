@@ -146,7 +146,7 @@ def console_node(request):
 def payout_report(request, ark_address):
     context = sidebar_context(request)
     context.update({'error': False})
-
+    payout_exceptions = ark_delegate_manager.models.EarlyAdopterExceptions.objects.all().values_list()
     request.session['current_wallet'] = ark_address
 
     # check if we have a wallet tag
@@ -179,15 +179,10 @@ def payout_report(request, ark_address):
     status = None
     if context['current_delegate'] == 'dutchdelegate':
         status = 'Regular voter'
-        if context['last_vote_timestamp'] < ark_delegate_manager.constants.CUT_OFF_EARLY_ADOPTER:
+        if context['last_vote_timestamp'] < ark_delegate_manager.constants.CUT_OFF_EARLY_ADOPTER \
+        or ark_address in payout_exceptions:
             status = 'Early Adopter'
-        else:
-            try:
-                res = ark_delegate_manager.models.EarlyAdopterExceptions.objects.get(ark_address)
-                if res:
-                    status = 'Early Adopter'
-            except Exception:
-                pass
+
     context.update({'status': status})
 
     # converting context variables to correct units
