@@ -225,6 +225,9 @@ def balance_report(request, ark_address):
     context = sidebar_context(request)
     context['error'] = False
     res = ark_analytics.analytic_functions.gen_balance_report(ark_address)
+    if len(res['balance_over_time']):
+        context['error'] = True
+
     context.update(res)
 
     # generate a chart and format balances with appropriate units
@@ -238,6 +241,7 @@ def balance_report(request, ark_address):
         ])
 
     context['balance_over_time'].reverse()
+
     data = SimpleDataSource(data=data_list)
     chart = LineChart(data, options={'title': 'Balance History'})
     context.update({
