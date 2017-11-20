@@ -42,7 +42,7 @@ def gen_payout_report(wallet):
 
     # initialize some variables
     total_reward = 0
-    payout_result = {}
+    payout_result = []
     share_percentage = None
     sender_delegate = 'unknown delegate'
 
@@ -70,12 +70,12 @@ def gen_payout_report(wallet):
                 if vote_timestamp < 16247647 or tx.recipientId in info.EXCEPTIONS:
                     share_percentage = 0.96
 
-        payout_result.update({
-            tx.id:
+        payout_result.append({
                 {'amount': tx.amount,
                  'timestamp': tx.timestamp,
                  'share': share_percentage,
                  'delegate': sender_delegate,
+                 'id': tx.id,
                  }
         })
 

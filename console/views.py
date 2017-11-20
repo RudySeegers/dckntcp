@@ -168,8 +168,8 @@ def payout_report(request, ark_address):
     data_list = [['date', 'Payout Amount']]
     for i in context['payout_history']:
         data_list.append([
-            arktool.utils.arkt_to_datetime(context['payout_history'][i]['timestamp']).strftime('%d/%m/%Y'),
-            context['payout_history'][i]['amount']/arkinfo.ARK
+            arktool.utils.arkt_to_datetime(i['timestamp']).strftime('%d/%m/%Y'),
+            i['amount']/arkinfo.ARK
         ])
     data = SimpleDataSource(data=data_list)
     chart = LineChart(data, options={'title': 'Payout History'})
@@ -192,8 +192,8 @@ def payout_report(request, ark_address):
 
     # converting context variables to correct units
     for i in context['payout_history']:
-        context['payout_history'][i]['timestamp'] = arktool.utils.arkt_to_datetime(context['payout_history'][i]['timestamp'])
-        context['payout_history'][i]['amount'] = context['payout_history'][i]['amount'] / arkinfo.ARK
+        i['timestamp'] = arktool.utils.arkt_to_datetime(i['timestamp'])
+        i['amount'] = i['amount'] / arkinfo.ARK
 
     print(context['payout_history'])
     context['balance'] = context['balance'] / arkinfo.ARK
