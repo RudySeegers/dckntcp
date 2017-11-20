@@ -155,11 +155,11 @@ LOGIN_REDIRECT_URL = '/home'
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = 'dutchdelegate@gmail.com'
-EMAIL_HOST_PASSWORD = '*9aw3k^r&V6Gc#gryXSQwY&g@Yw@xr!yvySFbDrfExAGpE*K77'
+EMAIL_HOST_PASSWORD = config('EMAIL_PASSWORD')
 EMAIL_PORT = 587
 
 RAVEN_CONFIG = {
-    'dsn': 'https://28bb33619731412192e45a738c4a98ca:ee7da28b1fc34b95a8a91365558ffb4a@sentry.io/235432',
+    'dsn': config('RAVEN_DSN'),
 }
 
 LOGGING = {
@@ -213,6 +213,7 @@ CRON_CLASSES = [
     "ark_delegate_manager.cron.UpdateDutchDelegateStatus",
     "ark_delegate_manager.cron.UpdateDelegates",
     "ark_delegate_manager.cron.PayRewardsWallet",
+    "ark_delegate_manager.cron.UpdateDelegatesBlockchain"
 ]
 
 MEDIA_ROOT = PROJECT_PATH + '/media/'
