@@ -185,17 +185,22 @@ def payout_report(request, ark_address):
             try:
                 res = ark_delegate_manager.models.EarlyAdopterExceptions.objects.get(ark_address)
                 if res:
-                    status = 'early adopter'
+                    status = 'Early Adopter'
             except Exception:
                 pass
     context.update({'status': status})
 
     # converting context variables to correct units
     for i in context['payout_history']:
-        i['timestamp'] = arktool.utils.arkt_to_datetime(i['timestamp'])
+        i['time'] = arktool.utils.arkt_to_datetime(i['timestamp'])
         i['amount'] = i['amount'] / arkinfo.ARK
+        if i['share']:
+            i['share'] = i['share'] * 100
+        else:
+            i['share'] = 'Not available'
 
-    print(context['payout_history'])
+
+    context['payout_history'].reverse()
     context['balance'] = context['balance'] / arkinfo.ARK
     context['builduppayout'] = context['balance'] / arkinfo.ARK
     context['total_stake_reward'] = context['total_stake_reward'] / arkinfo.ARK
