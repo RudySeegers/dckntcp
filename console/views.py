@@ -16,6 +16,8 @@ from . import config
 import arkdbtools.dbtools as arktool
 import arkdbtools.config as arkinfo
 import ark_delegate_manager.constants
+import ark_analytics.analytic_functions
+
 logger = logging.getLogger(__name__)
 
 
@@ -141,278 +143,94 @@ def console_node(request):
 
 
 @login_required(login_url='/login/')
-def console_wallet_history(request):
-    arktool.set_connection(
-        host=config.CONNECTION['HOST'],
-        database=config.CONNECTION['DATABASE'],
-        user=config.CONNECTION['USER'],
-        password=config.CONNECTION['PASSWORD']
-    )
-
-    arktool.set_delegate(
-        address=config.DELEGATE['ADDRESS'],
-        pubkey=config.DELEGATE['PUBKEY'],
-    )
-
+def payout_report(request, ark_address):
     context = sidebar_context(request)
-    data_list = [
-        ['date', 'Balance'],
-        [datetime.datetime.now(), 0]
-    ]
-    data = SimpleDataSource(data=data_list)
-    chart = LineChart(data, options={'title': 'Balance History'})
+    request.session['current_wallet'] = ark_address
 
-    context.update({'chart': chart})
-    current_user = User.objects.get(username=request.user.username)
+    # check if we have a wallet tag
+    request.session['current_tag'] = None
+    if ark_address == request.session['arkmainwallet']:
+        request.session['current_tag'] = request.session['arkmaintag']
+    elif request.session['arksecwallet']:
+        request.session['current_tag'] = request.session['arksectag']
 
-    wallet = current_user.user.main_ark_wallet
-    balance_over_time = arktool.Address.balance_over_time(wallet)
-    txhistory = arktool.Address.transactions(wallet)
-    for tx in balance_over_time:
-        data_list.append([arktool.utils.arkt_to_datetime(tx.timestamp), tx.amount / arkinfo.ARK])
-    data = SimpleDataSource(data=data_list)
-    chart = LineChart(data, options={'title': 'Balance History'})
-    context.update({'chart': chart})
-    tx_dic = {}
-    for x in txhistory:
-        if tx.senderId == wallet:
-            amount = -x.amount
-            txtype = 'Send'
-            otherparty = tx.recipientId
-        elif tx.recipientId == wallet:
-            amount = x.amount
-            txtype = 'Receive'
-            otherparty = tx.senderId
-        elif x.type == 2 or x.type == 3:
-            txtype = 'Administrative Transaction'
-            otherparty = None
-        else:
-            amount = x.amount
-            txtype = x.type
-            otherparty = tx.senderId
-
-        tx_dic.update({x.id: {'amount': amount,
-                              'type': txtype,
-                              'otherparty': otherparty}})
-    context.update({'tx_dic': tx_dic,
-                    'error': False})
-    return render(request, 'console/console_wallet_statistics.html', context)
-
-
-@login_required(login_url='/login/')
-def console_payout_report_ark_wallet_main(request):
-    context = sidebar_context(request)
-    address = context['arkmainwallet']
-    wallettag = None
-    try:
-        wallettag = context['arkmaintag']
-    except Exception:
-        pass
-
-    res = gen_payout_report(
-        request=request,
-        wallet=address,
-        wallet_type='main_ark',)
-
+    res = ark_analytics.analytic_functions.gen_payout_report(ark_address)
     context.update(res)
-    context.update({'wallettag': wallettag})
-    return render(request, "console/console_wallet_statistics.html", context)
 
+    voter = ark_delegate_manager.models.VotePool.objects.get(ark_address=ark_address)
+    builduppayout = voter.payout_amount
+    context.update({'builduppayout': builduppayout})
 
-@login_required(login_url='/login/')
-def console_payout_report_ark_wallet_sec(request):
-    context = sidebar_context(request)
-    address = context['arksecwallet']
-    wallettag = None
-    try:
-        wallettag = context['arksectag']
-    except Exception:
-        pass
-
-    res = gen_payout_report(
-        request=request,
-        wallet=address,
-        wallet_type='sec_ark',)
-
-    context.update(res)
-    context.update({'wallettag': wallettag})
-
-    return render(request, "console/console_wallet_statistics.html", context)
-
-
-@login_required(login_url='/login/')
-def console_balance_report_ark_wallet_sec(request):
-    context = sidebar_context(request)
-    address = context['arksecwallet']
-    wallettag = None
-    try:
-        wallettag = context['arksectag']
-    except Exception:
-        pass
-    res = gen_balance_report(request, address)
-    context.update(res)
-    context.update({'wallettag': wallettag})
-    return render(request, 'console/console_wallet_balance.html', context)
-
-
-@login_required(login_url='/login/')
-def console_balance_report_ark_wallet_main(request):
-    context = sidebar_context(request)
-    address = context['arkmainwallet']
-    wallettag = None
-    try:
-        wallettag = context['arkmaintag']
-    except Exception:
-        pass
-    res = gen_balance_report(request, address)
-    context.update(res)
-    context.update({'wallettag': wallettag})
-    return render(request, 'console/console_wallet_balance.html', context)
-
-
-@login_required(login_url='/login/')
-def gen_balance_report(request, wallet):
-    res = {}
-    arktool.set_connection(
-        host=config.CONNECTION['HOST'],
-        database=config.CONNECTION['DATABASE'],
-        user=config.CONNECTION['USER'],
-        password=config.CONNECTION['PASSWORD']
-    )
-
-    arktool.set_delegate(
-        address=config.DELEGATE['ADDRESS'],
-        pubkey=config.DELEGATE['PUBKEY'],
-    )
-
-    balance_over_time = arktool.Address.balance_over_time(wallet)
-    data_list = [['date', 'Balance']]
-    balances = []
-    for balance in balance_over_time:
-        data_list.append([arktool.utils.arkt_to_datetime(balance.timestamp).strftime('%d/%m/%Y'), balance.amount/arkinfo.ARK])
-        balances.append({'timestamp': arktool.utils.arkt_to_datetime(balance.timestamp),
-                         'balance': balance.amount/arkinfo.ARK})
-
-    data = SimpleDataSource(data=data_list)
-    chart = LineChart(data, options={'title': 'Balance History'})
-    stake_amount = 0
-
-    payouts = arktool.Address.payout(wallet)
-    for i in payouts:
-        stake_amount += i.amount/arkinfo.ARK
-
-    res.update({'chart': chart,
-                'stakeamount': stake_amount,
-                'balances': balances,
-                'error': False,
-                'wallet': wallet})
-    return res
-
-
-@login_required(login_url='/login/')
-def gen_payout_report(request, wallet, wallet_type):
-    res = {}
-    arktool.set_connection(
-        host=config.CONNECTION['HOST'],
-        database=config.CONNECTION['DATABASE'],
-        user=config.CONNECTION['USER'],
-        password=config.CONNECTION['PASSWORD']
-    )
-
-    arktool.set_delegate(
-        address=config.DELEGATE['ADDRESS'],
-        pubkey=config.DELEGATE['PUBKEY'],
-    )
-
-    try:
-        balance = arktool.Address.balance(wallet)
-        payout_history = arktool.Address.payout(wallet)
-        last_vote = arktool.Address.votes(wallet)[0]
-        height = arktool.Node.height()
-    except Exception:
-        logger.exception('error in obtaining ark-data in gen_payout_report')
-        return res
-
-    # unpack lastvote
-    vote_timestamp = last_vote.timestamp
-    if last_vote.direction:
-        delegate = ark_delegate_manager.models.ArkDelegates.objects.get(pubkey=last_vote.delegate).username
-    else:
-        delegate = None
-
-    builduppayout = 0
-    try:
-        builduppayout = ark_delegate_manager.models.VotePool.objects.get(ark_address=wallet).payout_amount
-    except Exception:
-        pass
-
-    # initialize some variables
-    total_reward = 0
-    payout_result = []
-    share_p = 'not available'
-    data_list = [['date', 'Payout amount']]
-    sender_delegate = 'unknown delegate'
-
-    for tx in payout_history:
-        total_reward += tx.amount
-        data_list.append([arktool.utils.arkt_to_datetime(tx.timestamp).strftime('%d/%m/%Y'), tx.amount/arkinfo.ARK])
-
-        # this is a fast try, as in 99% of the cases tx.senderId is in the database
-        try:
-            sender_delegate = ark_delegate_manager.models.ArkDelegates.objects.get(address=tx.senderId)
-        except Exception:
-            pass
-
-        # this works for all delegates
-        if tx.senderId in info.PAYOUT_DICT:
-            for t in info.PAYOUT_DICT[tx.senderId]:
-                if tx.timestamp < t:
-                    share_percentage = info.PAYOUT_DICT[tx.senderId][t]
-                    share_p = str(int(100 * share_percentage)) + '%'
-
-        # for dutchdelegate voters
-        if sender_delegate == 'dutchdelegate':
-            for t in info.PAYOUT_DICT['AZse3vk8s3QEX1bqijFb21aSBeoF6vqLYE']:
-                if tx.timestamp < t:
-                    share_percentage = info.PAYOUT_DICT[tx.senderId][t]
-            if share_percentage == 0.95:
-                if vote_timestamp < 16247647 or tx.recipientId in info.EXCEPTIONS:
-                    share_percentage = 0.96
-            share_p = str(int(100*share_percentage)) + '%'
-
-        payout_result.append(
-            {'amount': tx.amount/arkinfo.ARK,
-             'time': arktool.utils.arkt_to_datetime(tx.timestamp).strftime('%d/%m/%Y'),
-             'share': share_p,
-             'delegate': sender_delegate,
-             })
-    payout_result.reverse()
-
-    if vote_timestamp < 16247647 and delegate == 'dutchdelegate' or wallet in ark_delegate_manager.constants.PAYOUT_EXCEPTIONS:
-        status = 'Early adopter'
-    elif delegate == 'dutchdelegate':
-        status = 'Active voter'
-    else:
-        status = None
-
+    data_list = [['date', 'Payout Amount']]
+    for i in context['payout_history']:
+        data_list.append([
+            arktool.utils.arkt_to_datetime(context['payout_history'][i]['timestamp']).strftime('%d/%m/%Y'),
+            context['payout_history'][i]['amount']/arkinfo.ARK
+        ])
     data = SimpleDataSource(data=data_list)
     chart = LineChart(data, options={'title': 'Payout History'})
+    context.update({'chart': chart})
 
-    res.update({
-        'current_delegate': delegate,
-        'wallet': wallet,
-        'balance': 'Ѧ' + str(balance/arkinfo.ARK),
-        'tx_history': payout_result,
-        'timestamp_vote': vote_timestamp,
+    #display their dutchdelegate specific status:
+    status = None
+    if context['current_delegate'] == 'dutchdelegate':
+        status = 'Regular voter'
+        if context['last_vote_timestamp'] < ark_delegate_manager.constants.CUT_OFF_EARLY_ADOPTER:
+            status = 'Early Adopter'
+        else:
+            try:
+                res = ark_delegate_manager.models.EarlyAdopterExceptions.objects.get(ark_address)
+                if res:
+                    status = 'early adopter'
+            except Exception:
+                pass
+    context.update({'status': status})
+
+    # converting context variables to correct units
+    for i in context['payout_history']:
+        i['timestamp'] = arktool.utils.arkt_to_datetime(i['timestamp'])
+        i['amount'] = i['amount'] / arkinfo.ARK
+
+    context['balance'] = context['balance'] / arkinfo.ARK
+    context.update({'error': False})
+
+    return render(request, "console/console_wallet_statistics.html", context)
+
+
+@login_required(login_url='/login/')
+def balance_report(request, ark_address):
+    arktool.set_connection(
+        host=config.CONNECTION['HOST'],
+        database=config.CONNECTION['DATABASE'],
+        user=config.CONNECTION['USER'],
+        password=config.CONNECTION['PASSWORD']
+    )
+
+    arktool.set_delegate(
+        address=config.DELEGATE['ADDRESS'],
+        pubkey=config.DELEGATE['PUBKEY'],
+    )
+
+    context = sidebar_context(request)
+    res = ark_analytics.analytic_functions.gen_balance_report(ark_address)
+
+    # generate a chart and format balances with appropriate units
+    data_list = [['date', 'Balance']]
+    for i in res['balance_over_time']:
+        context['balance_over_time'][i]['timestamp'] = arktool.utils.arkt_to_datetime(context['balance_over_time'][i]['timestamp'])
+        context['balance_over_time'][i]['amount'] = context['balance_over_time'][i]['amount'] / arkinfo.ARK
+        data_list.append([
+            context['balance_over_time'][i]['timestamp'].strftime('%d/%m/%Y'),
+            context['balance_over_time'][i]['amount']
+        ])
+
+    data = SimpleDataSource(data=data_list)
+    chart = LineChart(data, options={'title': 'Balance History'})
+    context.update({
         'chart': chart,
-        'total_reward': 'Ѧ' + str(total_reward/arkinfo.ARK),
-        'height': height,
-        'info': None,
-        'status': status,
-        'builduppayout': 'Ѧ' + str(builduppayout/arkinfo.ARK),
-        'error': False,
-        })
-    return res
+    })
+
+    return render(request, 'console/console_wallet_statistics.html', context)
 
 
 @login_required(login_url='/login/')
