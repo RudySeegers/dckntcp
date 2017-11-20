@@ -23,6 +23,9 @@ class UpdateVotePool(CronJobBase):
     logger.info('updating votepool')
 
     def do(self):
+        '''
+        add voters to our record of all voters and calculate their balances
+        '''
         try:
             logger.info('starting share calculation')
             ark_node.set_connection(
@@ -57,9 +60,12 @@ class UpdateVotePool(CronJobBase):
 class RunPayments(CronJobBase):
     RUN_EVERY_MINS = 360
     schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
-    code = 'ark_delegate_manager.update_vote_pool'
+    code = 'ark_delegate_manager.run_payments'
 
     def do(self):
+        '''
+        calculate and run weekly payouts
+        '''
         try:
             logger.critical('starting payment run')
 
@@ -67,6 +73,18 @@ class RunPayments(CronJobBase):
             if not ark_node.Node.check_node(51) and settings.DEBUG == False:
                 logger.fatal('Node is more than 51 blocks behind')
                 return
+
+            ark_node.set_connection(
+                host=config.CONNECTION['HOST'],
+                database=config.CONNECTION['DATABASE'],
+                user=config.CONNECTION['USER'],
+                password=config.CONNECTION['PASSWORD']
+            )
+
+            ark_node.set_delegate(
+                address=config.DELEGATE['ADDRESS'],
+                pubkey=config.DELEGATE['PUBKEY'],
+            )
 
             payouts, timestamp = ark_node.Delegate.trueshare()
             logger.info('starting payment run at arktimestamp: {}'.format(timestamp))
@@ -84,6 +102,9 @@ class VerifyReceivingArkAddresses(CronJobBase):
     code = 'ark_delegate_manager.verify_receiving_ark_addresses'
 
     def do(self):
+        '''
+        check blockchain for wallet verification tokens
+        '''
         logger.info('starting verification update round. CODE: {}'.format('ark_delegate_manager.verify_receiving_ark_addresses'))
 
         if not ark_node.Node.check_node(51) and settings.DEBUG == False:
@@ -101,6 +122,9 @@ class UpdateDutchDelegateStatus(CronJobBase):
     code = 'ark_delegate_manager.update_dutch_delegate_status'
 
     def do(self):
+        '''
+        update the ark-node statistics
+        '''
         try:
             payout_functions.update_arknode()
         except Exception:
@@ -113,6 +137,9 @@ class UpdateDelegates(CronJobBase):
     code = 'ark_delegate_manager.update_delegates'
 
     def do(self):
+        '''
+        update delegate statistics and save in DB
+        '''
         try:
             api.use('ark')
             ark_node.set_connection(
@@ -148,6 +175,9 @@ class GetBlockchainHeight(CronJobBase):
     code = 'ark_delegate_manager.get_blockchain_height'
 
     def do(self):
+        '''
+        update the currenct blockchain height and save it in DB
+        '''
         try:
             api.use('ark')
             blockchain_height = ark_node.Blockchain.height()
@@ -164,6 +194,10 @@ class PayRewardsWallet(CronJobBase):
     code = 'ark_delegate_manager.pay_rewards_wallet'
 
     def do(self):
+        '''
+        payout the delegate reward after saving the payouts for a certain time
+        '''
+
         try:
             delegate = ark_delegate_manager.models.DutchDelegateStatus.objects.get(id='main')
             reward = delegate.reward
@@ -175,3 +209,29 @@ class PayRewardsWallet(CronJobBase):
                 delegate.save()
         except Exception:
             logger.exception('failed to transmit the delegate reward: {}'.format(reward/ARK))
+
+
+# this cronjob updates historic delegates
+class UpdateDelegatesBlockchain(CronJobBase):
+    RUN_EVERY_MINS = 10000
+    schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
+    code = 'ark_delegate_manager.update_delegate_blockchain'
+
+    def do(self):
+        """
+        update the delegate database with historic delegates. This also obtains data on delegates below the top 51.
+        """
+        try:
+            all_delegates = ark_node.Delegate.delegates()
+
+            for i in all_delegates:
+                delegate, created = ark_delegate_manager.models.ArkDelegates.objects.get_or_create(pubkey=i.pubkey)
+                if created:
+                    delegate.address = i.address
+                    delegate.username = i.username
+                    delegate.save()
+        except Exception:
+            logger.exception('failure in UpdateDelegatesBlockchain')
+
+
+
