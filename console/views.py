@@ -221,10 +221,10 @@ def balance_report(request, ark_address):
     data_list = [['date', 'Balance']]
     for i in res['balance_over_time']:
         i['timestamp'] = arktool.utils.arkt_to_datetime(i['timestamp'])
-        i['amount'] = i['amount'] / arkinfo.ARK
+        i['balance'] = i['balance'] / arkinfo.ARK
         data_list.append([
             i['timestamp'].strftime('%d/%m/%Y'),
-            i['amount']
+            i['balance']
         ])
 
     data = SimpleDataSource(data=data_list)
