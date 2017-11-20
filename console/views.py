@@ -145,6 +145,8 @@ def console_node(request):
 @login_required(login_url='/login/')
 def payout_report(request, ark_address):
     context = sidebar_context(request)
+    context.update({'error': False})
+
     request.session['current_wallet'] = ark_address
 
     # check if we have a wallet tag
@@ -161,7 +163,7 @@ def payout_report(request, ark_address):
         builduppayout = voter.payout_amount
         context.update({'builduppayout': builduppayout})
     except django_exceptions.ObjectDoesNotExist:
-        pass
+        context.update({'error': True})
 
     data_list = [['date', 'Payout Amount']]
     for i in context['payout_history']:
@@ -194,8 +196,6 @@ def payout_report(request, ark_address):
         i['amount'] = i['amount'] / arkinfo.ARK
 
     context['balance'] = context['balance'] / arkinfo.ARK
-    context.update({'error': False})
-
     return render(request, "console/console_wallet_statistics.html", context)
 
 
