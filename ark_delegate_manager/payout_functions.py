@@ -46,7 +46,7 @@ def paymentrun(payout_dict, current_timestamp):
     failed_amount = 0
     succesful_transactions = 0
     succesful_amount = 0
-    vendorfield = ark_delegate_manager.models.Settings.objects.get(id='main').vendorfield
+    vendorfield = ark_delegate_manager.models.Setting.objects.get(id='main').vendorfield
     for voter in payout_dict:
 
         send_destination = voter
@@ -54,8 +54,8 @@ def paymentrun(payout_dict, current_timestamp):
         frequency = 2
         verified = False
         delegate_share = 0
-        payout_exceptions = ark_delegate_manager.models.EarlyAdopterExceptions.objects.all().values_list()
-        blacklist = ark_delegate_manager.models.Blacklist.objects.all().values_list()
+        payout_exceptions = ark_delegate_manager.models.EarlyAdopterAddressException.objects.all().values_list()
+        blacklist = ark_delegate_manager.models.BlacklistedAddress.objects.all().values_list()
         try:
             user_settings = console.models.UserProfile.objects.get(main_ark_wallet=voter)
             frequency = user_settings.payout_frequency

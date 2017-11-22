@@ -2,12 +2,12 @@ from django.db import models
 from django.core.validators import RegexValidator
 
 
-class Settings(models.Model):
+class Setting(models.Model):
     id = models.CharField(default='main', primary_key=True, max_length=10)
     vendorfield = models.CharField(max_length=64, default='Thank you for voting.')
 
 
-class Blacklist(models.Model):
+class BlacklistedAddress(models.Model):
     address = RegexValidator(r'A[0-9a-zA-Z]{33}$', 'Only valid address formats are allowed.')
     ark_address = models.CharField(max_length=34, blank=True, default='', validators=[address], unique=True)
     info = models.CharField(max_length=10000, blank=True, default='')
@@ -28,7 +28,7 @@ class DutchDelegateStatus(models.Model):
     reward = models.IntegerField(default=0)
 
 
-class EarlyAdopterExceptions(models.Model):
+class EarlyAdopterAddressException(models.Model):
     address = RegexValidator(r'A[0-9a-zA-Z]{33}$', 'Only valid address formats are allowed.')
     ark_address = models.CharField(max_length=34, blank=True, default='', validators=[address], unique=True)
     email = models.EmailField()
