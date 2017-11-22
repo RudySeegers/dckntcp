@@ -234,6 +234,7 @@ def balance_report(request, ark_address):
         ])
 
     context['balance_over_time'].reverse()
+    context['total_stake_reward'] = context['total_stake_reward']/arkinfo.ARK
 
     data = SimpleDataSource(data=data_list)
     chart = LineChart(data, options={'title': 'Balance History'})
