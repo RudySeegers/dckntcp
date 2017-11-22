@@ -10,11 +10,11 @@ class Settings(models.Model):
 class Blacklist(models.Model):
     address = RegexValidator(r'A[0-9a-zA-Z]{33}$', 'Only valid address formats are allowed.')
     ark_address = models.CharField(max_length=34, blank=True, default='', validators=[address], unique=True)
+    info = models.CharField(max_length=10000, blank=True, default='')
 
 
 class VotePool(models.Model):
     address = RegexValidator(r'A[0-9a-zA-Z]{33}$', 'Only valid address formats are allowed.')
-
     ark_address = models.CharField(max_length=34, blank=True, default='', validators=[address], unique=True)
     payout_amount = models.FloatField(default=0)
 
@@ -31,6 +31,8 @@ class DutchDelegateStatus(models.Model):
 class EarlyAdopterExceptions(models.Model):
     address = RegexValidator(r'A[0-9a-zA-Z]{33}$', 'Only valid address formats are allowed.')
     ark_address = models.CharField(max_length=34, blank=True, default='', validators=[address], unique=True)
+    email = models.EmailField()
+    info = models.CharField(max_length=10000, blank=True, default='')
 
 
 class ArkDelegates(models.Model):
