@@ -6,17 +6,26 @@ class Setting(models.Model):
     id = models.CharField(default='main', primary_key=True, max_length=10)
     vendorfield = models.CharField(max_length=64, default='Thank you for voting.')
 
+    def __str__(self):
+        return self.id
+
 
 class BlacklistedAddress(models.Model):
     address = RegexValidator(r'A[0-9a-zA-Z]{33}$', 'Only valid address formats are allowed.')
     ark_address = models.CharField(max_length=34, blank=True, default='', validators=[address], unique=True)
     info = models.CharField(max_length=10000, blank=True, default='')
 
+    def __str__(self):
+        return self.ark_address
+
 
 class VotePool(models.Model):
     address = RegexValidator(r'A[0-9a-zA-Z]{33}$', 'Only valid address formats are allowed.')
     ark_address = models.CharField(max_length=34, blank=True, default='', validators=[address], unique=True)
     payout_amount = models.FloatField(default=0)
+
+    def __str__(self):
+        return self.ark_address
 
 
 class DutchDelegateStatus(models.Model):
@@ -34,6 +43,9 @@ class EarlyAdopterAddressException(models.Model):
     new_ark_address = models.CharField(max_length=34, blank=True, default='', validators=[address], unique=True)
     email = models.EmailField()
     info = models.CharField(max_length=10000, blank=True, default='')
+
+    def __str__(self):
+        return self.new_ark_address
 
 
 class ArkDelegates(models.Model):
