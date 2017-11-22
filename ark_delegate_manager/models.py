@@ -30,7 +30,8 @@ class DutchDelegateStatus(models.Model):
 
 class EarlyAdopterAddressException(models.Model):
     address = RegexValidator(r'A[0-9a-zA-Z]{33}$', 'Only valid address formats are allowed.')
-    ark_address = models.CharField(max_length=34, blank=True, default='', validators=[address], unique=True)
+    old_ark_address = models.CharField(max_length=34, blank=True, default='', validators=[address], unique=True)
+    new_ark_address = models.CharField(max_length=34, blank=True, default='', validators=[address], unique=True)
     email = models.EmailField()
     info = models.CharField(max_length=10000, blank=True, default='')
 

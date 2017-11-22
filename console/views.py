@@ -144,7 +144,7 @@ def console_node(request):
 def payout_report(request, ark_address):
     context = sidebar_context(request)
     context.update({'error': False})
-    payout_exceptions = ark_delegate_manager.models.EarlyAdopterAddressException.objects.all().values_list()
+    payout_exceptions = ark_delegate_manager.models.EarlyAdopterAddressException.objects.all().values_list('new_ark_address', flat=True)
     request.session['current_wallet'] = ark_address
 
     # check if we have a wallet tag
