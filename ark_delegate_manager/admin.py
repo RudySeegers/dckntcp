@@ -1,9 +1,9 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import EarlyAdopterExceptions, Blacklist, Settings
+from .models import EarlyAdopterAddressException, BlacklistedAddress, Setting
 
-admin.site.register(EarlyAdopterExceptions)
-admin.site.register(Blacklist)
-admin.site.register(Settings)
+admin.site.register(EarlyAdopterAddressException)
+admin.site.register(BlacklistedAddress)
+admin.site.register(Setting)
 
