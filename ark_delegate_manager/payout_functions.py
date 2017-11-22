@@ -46,7 +46,7 @@ def paymentrun(payout_dict, current_timestamp):
     failed_amount = 0
     succesful_transactions = 0
     succesful_amount = 0
-    vendorfield = ark_delegate_manager.models.DutchDelegateStatus.objects.get(id='main').vendorfield
+    vendorfield = ark_delegate_manager.models.Settings.objects.get(id='main').vendorfield
     for voter in payout_dict:
 
         send_destination = voter
@@ -55,6 +55,7 @@ def paymentrun(payout_dict, current_timestamp):
         verified = False
         delegate_share = 0
         payout_exceptions = ark_delegate_manager.models.EarlyAdopterExceptions.objects.all().values_list()
+        blacklist = ark_delegate_manager.models.Blacklist.objects.all().values_list()
         try:
             user_settings = console.models.UserProfile.objects.get(main_ark_wallet=voter)
             frequency = user_settings.payout_frequency
@@ -71,6 +72,8 @@ def paymentrun(payout_dict, current_timestamp):
             share_percentage = 0.96
 
         amount = payout_dict[voter]['share'] * share_percentage
+        if voter in blacklist:
+            break
 
         if frequency == 1 and payout_dict[voter]['last_payout'] < current_timestamp - (constants.DAY - 5 * constants.HOUR):
             if amount > constants.MIN_AMOUNT_DAILY:
