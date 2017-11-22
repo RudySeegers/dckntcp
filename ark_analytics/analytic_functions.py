@@ -45,7 +45,7 @@ def gen_payout_report(wallet):
     payout_result = []
     share_percentage = None
     sender_delegate = 'unknown delegate'
-
+    share_exceptions = ark_delegate_manager.models.EarlyAdopterAddressException.objects.all().values_list('new_ark_address', flat=True)
     for tx in payout_history:
         total_reward += tx.amount
 
@@ -67,7 +67,7 @@ def gen_payout_report(wallet):
                 if tx.timestamp < t:
                     share_percentage = info.PAYOUT_DICT[tx.senderId][t]
             if share_percentage == 0.95:
-                if vote_timestamp < 16247647 or tx.recipientId in info.EXCEPTIONS:
+                if vote_timestamp < 16247647 or tx.recipientId in share_exceptions:
                     share_percentage = 0.96
 
         payout_result.append({
