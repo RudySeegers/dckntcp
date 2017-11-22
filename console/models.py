@@ -22,6 +22,9 @@ class UserProfile(models.Model):
 
     payout_frequency = models.IntegerField(choices=PAYOUT_CHOICES, default=2)
 
+    def __str__(self):
+        return self.user
+
 
 def create_profile(sender, **kwargs):
     user = kwargs["instance"]
@@ -31,6 +34,3 @@ def create_profile(sender, **kwargs):
         post_save.connect(create_profile, sender=User)
 
 
-
-def __str__(self):
-    return '%s %s' % (self.main_ark_wallet, self.payout_frequency)
