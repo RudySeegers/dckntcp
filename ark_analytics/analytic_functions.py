@@ -26,6 +26,7 @@ def gen_payout_report(wallet):
     height = arktool.Node.height()
     balance = arktool.Address.balance(wallet)
     payout_history = arktool.Address.payout(wallet)
+    delegate_list = ark_delegate_manager.models.ArkDelegates.objects.all().values_list('username', 'address')
 
     try:
         last_vote = arktool.Address.votes(wallet)[0]
@@ -51,7 +52,9 @@ def gen_payout_report(wallet):
 
         # this is a fast try, as in 99% of the cases tx.senderId is in the database
         try:
-            sender_delegate = ark_delegate_manager.models.ArkDelegates.objects.get(address=tx.senderId).username
+            for i in delegate_list:
+                if tx.senderId == i[1]:
+                    sender_delegate = i[0]
         except Exception:
             pass
 
