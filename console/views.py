@@ -144,7 +144,10 @@ def console_node(request):
 def payout_report(request, ark_address):
     context = sidebar_context(request)
     context.update({'error': False})
+
     payout_exceptions = ark_delegate_manager.models.EarlyAdopterAddressException.objects.all().values_list('new_ark_address', flat=True)
+    blacklist = ark_delegate_manager.models.BlacklistedAddress.objects.all().values_list('ark_address', flat=True)
+
     request.session['current_wallet'] = ark_address
 
     # check if we have a wallet tag
@@ -163,16 +166,6 @@ def payout_report(request, ark_address):
     except django_exceptions.ObjectDoesNotExist:
         context.update({'error': True})
 
-    data_list = [['date', 'Payout Amount']]
-    for i in context['payout_history']:
-        data_list.append([
-            arktool.utils.arkt_to_datetime(i['timestamp']).strftime('%d/%m/%Y'),
-            i['amount']/arkinfo.ARK
-        ])
-    data = SimpleDataSource(data=data_list)
-    chart = LineChart(data, options={'title': 'Payout History'})
-    context.update({'chart': chart})
-
     #display their dutchdelegate specific status:
     status = None
     if context['current_delegate'] == 'dutchdelegate':
@@ -181,21 +174,34 @@ def payout_report(request, ark_address):
         or ark_address in payout_exceptions:
             status = 'Early Adopter'
 
+        if ark_address in blacklist:
+            status = 'Blacklisted'
+
     context.update({'status': status})
 
+
+    data_list = [['date', 'Payout Amount']]
     # converting context variables to correct units
     for i in context['payout_history']:
         i['time'] = arktool.utils.arkt_to_datetime(i['timestamp'])
         i['amount'] = i['amount'] / arkinfo.ARK
+
+        data_list.append([
+            i['time'].strftime('%d/%m/%Y'),
+            i['amount']
+        ])
         if i['share']:
             i['share'] = str(i['share'] * 100) + '%'
         else:
             i['share'] = 'Not available'
 
+    data = SimpleDataSource(data=data_list)
+    chart = LineChart(data, options={'title': 'Payout History'})
+    context.update({'chart': chart})
 
     context['payout_history'].reverse()
     context['balance'] = context['balance'] / arkinfo.ARK
-    context['builduppayout'] = context['balance'] / arkinfo.ARK
+    context['builduppayout'] = context['builduppayout'] / arkinfo.ARK
     context['total_stake_reward'] = context['total_stake_reward'] / arkinfo.ARK
 
     return render(request, "console/console_wallet_statistics.html", context)
