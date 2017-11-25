@@ -9,7 +9,20 @@ from . import config
 import console.models
 import hashlib
 import arkdbtools.utils as utils
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import transaction
+
+
+
 logger = logging.getLogger(__name__)
+
+
+class ConcurrencyError(Exception):
+    pass
+
+
+class LockError(Exception):
+    pass
 
 
 def send_tx(address, amount, vendor_field=''):
@@ -39,100 +52,6 @@ def send_tx(address, amount, vendor_field=''):
                                                                                            amount/info.ARK,
                                                                                            result))
         return False
-
-
-def paymentrun(payout_dict, current_timestamp):
-    failed_transactions = 0
-    failed_amount = 0
-    succesful_transactions = 0
-    succesful_amount = 0
-    vendorfield = ark_delegate_manager.models.Setting.objects.get(id='main').vendorfield
-    for voter in payout_dict:
-
-        send_destination = voter
-        share_percentage = 0.95
-        frequency = 2
-        verified = False
-        delegate_share = 0
-        payout_exceptions = ark_delegate_manager.models.EarlyAdopterAddressException.objects.all().values_list('new_ark_address', flat=True)
-        blacklist = ark_delegate_manager.models.BlacklistedAddress.objects.all().values_list('ark_address', flat=True)
-        try:
-            user_settings = console.models.UserProfile.objects.get(main_ark_wallet=voter)
-            frequency = user_settings.payout_frequency
-            # receiving_address = user_settings.receiving_ark_address
-            # verified = user_settings.receiving_ark_address_verified
-            # send_to_second = user_settings.ark_send_to_second_address
-
-            #send_to_second is not a bool, because the widget for an integerfield is much prettier
-            # if verified and send_to_second == 1:
-            #     send_destination = receiving_address
-        except Exception:
-            pass
-        if payout_dict[voter]['vote_timestamp'] < constants.CUT_OFF_EARLY_ADOPTER or voter in payout_exceptions:
-            share_percentage = 0.96
-
-        amount = payout_dict[voter]['share'] * share_percentage
-        if voter in blacklist:
-            break
-
-        if frequency == 1 and payout_dict[voter]['last_payout'] < current_timestamp - (constants.DAY - 5 * constants.HOUR):
-            if amount > constants.MIN_AMOUNT_DAILY:
-                amount -= info.TX_FEE
-                # admin_res = send_tx(address=voter, amount=1,
-                #                     vendor_field='|DD-admin| sent payout to: '.format(send_destination))
-                res = send_tx(address=send_destination, amount=amount, vendor_field=vendorfield)
-                if res:
-                    delegate_share = payout_dict[voter]['share'] - amount
-                    succesful_transactions += 1
-                    succesful_amount += amount
-                    logger.info('sent {0} to {1}  res: {2}'.format(amount, send_destination, res))
-                else:
-                    failed_transactions += 1
-                    failed_amount += amount
-                # if res and verified:
-                #     if not admin_res:
-                #         logger.fatal('failed to send administrative token to {}'.format(voter))
-        if frequency == 2 and payout_dict[voter]['last_payout'] < current_timestamp - (constants.WEEK - 5 * constants.HOUR):
-            if amount > constants.MIN_AMOUNT_WEEKY:
-
-                # admin_res = send_tx(address=voter, amount=1,
-                #                     vendor_field='|DD-admin| sent payout to: '.format(send_destination))
-                res = send_tx(address=send_destination, amount=amount, vendor_field=vendorfield)
-                if res:
-                    delegate_share = payout_dict[voter]['share'] - amount
-                    succesful_transactions += 1
-                    succesful_amount += amount
-                    logger.info('sent {0} to {1}  res: {2}'.format(amount, send_destination, res))
-                else:
-                    failed_transactions += 1
-                    failed_amount += amount
-
-                # if res and verified:
-                #     if not admin_res:
-                #         logger.fatal('failed to send administrative token to {}'.format(voter))
-        if frequency == 3 and payout_dict[voter]['last_payout'] < current_timestamp - constants.MONTH:
-            if amount > constants.MIN_AMOUNT_MONTHLY:
-                # admin_res = send_tx(address=voter, amount=1,
-                #                     vendor_field='|DD-admin| sent payout to: '.format(send_destination))
-                res = send_tx(address=send_destination, amount=amount, vendor_field=vendorfield)
-                if res:
-                    delegate_share = payout_dict[voter]['share'] - amount
-                    succesful_transactions += 1
-                    succesful_amount += amount
-                    logger.info('sent {0} to {1}  res: {2}'.format(amount, send_destination, res))
-                else:
-
-                    failed_transactions += 1
-                    failed_amount += amount
-        try:
-            dutchdelegate = ark_delegate_manager.models.DutchDelegateStatus.objects.get(id='main')
-            dutchdelegate.reward += delegate_share
-            dutchdelegate.save()
-        except Exception:
-            pass
-    if failed_transactions:
-        logger.critical('sent {0} transactions, failed {1} transactions'.format(succesful_transactions, failed_transactions))
-        logger.critical('amout successful: {0}, failed amount: {1}'.format(succesful_amount/info.ARK, failed_amount/info.ARK))
 
 
 def verify_address_run():
@@ -205,4 +124,149 @@ def update_arknode():
                 logger.exception('error in update_arknode')
 
 
+@transaction.atomic
+def set_lock_payment_run():
+    lock = ark_delegate_manager.models.PaymentLock.objects.select_for_update().get(id='main')
+    if lock.lock:
+        logger.fatal('paymentrun was started with PaymentLock on.')
+        raise ConcurrencyError('paymentrun was started with PaymentLock on.')
+    else:
+        lock.lock = True
+        lock.save()
 
+
+@transaction.atomic
+def release_lock_payment_run():
+    lock = ark_delegate_manager.models.PaymentLock.objects.select_for_update().get(id='main')
+    lock.lock = False
+    lock.save()
+
+
+def payment_run():
+    logger.critical('starting payment run')
+    ark_node.set_connection(
+        host=config.CONNECTION['HOST'],
+        database=config.CONNECTION['DATABASE'],
+        user=config.CONNECTION['USER'],
+        password=config.CONNECTION['PASSWORD']
+    )
+
+    ark_node.set_delegate(
+        address=config.DELEGATE['ADDRESS'],
+        pubkey=config.DELEGATE['PUBKEY'],
+    )
+
+    # if we are in test mode we don't care about our node status
+    if not ark_node.Node.check_node(51) and not settings.DEBUG:
+        logger.fatal('Node is more than 51 blocks behind')
+        return
+
+    payouts, current_timestamp = ark_node.Delegate.trueshare()
+
+    for voter in payouts:
+        send_destination = ark_delegate_manager.models.PayoutTable.objects.get_or_create(address=voter)
+        send_destination.amount = voter['share']
+        send_destination.vote_timestamp = voter['vote_timestamp']
+        send_destination.status = voter['status']
+        send_destination.last_payout_blockchain_side = voter['last_payout']
+        send_destination.save()
+
+    # and now on to actually sending the payouts
+    failed_transactions = 0
+    failed_amount = 0
+    succesful_transactions = 0
+    succesful_amount = 0
+    vendorfield = ark_delegate_manager.models.Setting.objects.get(id='main').vendorfield
+
+    payout_exceptions = ark_delegate_manager.models.EarlyAdopterAddressException.objects.all().values_list(
+        'new_ark_address', flat=True)
+
+    blacklist = ark_delegate_manager.models.BlacklistedAddress.objects.all().values_list(
+        'ark_address', flat=True)
+
+    for send_destination in ark_delegate_manager.models.PayoutTable.objects.all():
+        address = send_destination.address
+        pure_amount = send_destination.amount
+        vote_timestamp = send_destination.vote_timestamp
+        status = send_destination.status
+        last_payout = send_destination.last_payout_blockchain_side
+        last_payout_server_side = send_destination.last_payout_server_side
+
+        if current_timestamp < last_payout_server_side:
+            logger.fatal('double payment run occuring')
+            raise ConcurrencyError('double payment run occuring, lock needs to be manually removed')
+
+        if current_timestamp - last_payout_server_side < 15 * constants.HOUR:
+            logger.fatal('Time between payouts less than 15 hours according to server.')
+            raise ConcurrencyError('double payment run occuring, lock needs to be manually removed')
+
+        if address in blacklist:
+            continue
+
+        share_percentage = 0.95
+        frequency = 2
+        delegate_share = 0
+
+        try:
+            user_settings = console.models.UserProfile.objects.get(main_ark_wallet=address)
+            frequency = user_settings.payout_frequency
+        except ObjectDoesNotExist:
+            pass
+
+        if vote_timestamp < constants.CUT_OFF_EARLY_ADOPTER or address in payout_exceptions:
+            share_percentage = 0.96
+
+        amount = pure_amount * share_percentage
+        if status:
+            if frequency == 1 and last_payout < current_timestamp - (constants.DAY - 3 * constants.HOUR):
+                if amount > constants.MIN_AMOUNT_DAILY:
+                    amount -= info.TX_FEE
+                    res = send_tx(address=send_destination, amount=amount, vendor_field=vendorfield)
+                    if res:
+                        delegate_share = pure_amount - amount
+                        succesful_transactions += 1
+                        succesful_amount += amount
+                        logger.info('sent {0} to {1}  res: {2}'.format(amount, send_destination, res))
+                        send_destination.last_payout_server_side = last_payout
+                        send_destination.save()
+                    else:
+                        failed_transactions += 1
+                        failed_amount += amount
+
+            if frequency == 2 and last_payout < current_timestamp - (constants.WEEK - 5 * constants.HOUR):
+                if amount > constants.MIN_AMOUNT_WEEKY:
+                    res = send_tx(address=send_destination, amount=amount, vendor_field=vendorfield)
+                    if res:
+                        delegate_share = pure_amount - amount
+                        succesful_transactions += 1
+                        succesful_amount += amount
+                        logger.info('sent {0} to {1}  res: {2}'.format(amount, send_destination, res))
+                        send_destination.last_payout_server_side = last_payout
+                        send_destination.save()
+                    else:
+                        failed_transactions += 1
+                        failed_amount += amount
+
+            if frequency == 3 and last_payout < (current_timestamp - constants.MONTH - 5 * constants.HOUR):
+                if amount > constants.MIN_AMOUNT_MONTHLY:
+                    res = send_tx(address=send_destination, amount=amount, vendor_field=vendorfield)
+                    if res:
+                        delegate_share = pure_amount - amount
+                        succesful_transactions += 1
+                        succesful_amount += amount
+                        logger.info('sent {0} to {1}  res: {2}'.format(amount, send_destination, res))
+                        send_destination.last_payout_server_side = last_payout
+                        send_destination.save()
+                    else:
+                        failed_transactions += 1
+                        failed_amount += amount
+
+            dutchdelegate = ark_delegate_manager.models.DutchDelegateStatus.objects.get_or_create(id='main')
+            dutchdelegate.reward += delegate_share
+            dutchdelegate.save()
+
+    if failed_transactions:
+        logger.critical('sent {0} transactions, failed {1} transactions'.format(succesful_transactions,
+                                                                                failed_transactions))
+        logger.critical('amout successful: {0}, failed amount: {1}'.format(succesful_amount / info.ARK,
+                                                                           failed_amount / info.ARK))

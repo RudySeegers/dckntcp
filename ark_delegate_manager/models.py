@@ -65,3 +65,18 @@ class ArkDelegates(models.Model):
 class Node(models.Model):
     id = models.CharField(default='main', primary_key=True, max_length=10)
     blockchain_height = models.IntegerField(default=0)
+
+
+class PaymentLock(models.Model):
+    id = models.CharField(default='main', primary_key=True, max_length=10)
+    lock = models.BooleanField(default=False)
+
+
+class PayoutTable(models.Model):
+    address = RegexValidator(r'A[0-9a-zA-Z]{33}$', 'Only valid address formats are allowed.')
+    address = models.CharField(max_length=34, blank=True, validators=[address], unique=True)
+    amount = models.IntegerField(default=0)
+    last_payout_blockchain_side = models.IntegerField(default=0)
+    vote_timestamp = models.IntegerField(default=0)
+    status = models.BooleanField(default=False)
+    last_payout_server_side = models.IntegerField(default=0)

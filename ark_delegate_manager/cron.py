@@ -14,6 +14,10 @@ from arkdbtools.config import ARK
 from arky import api
 from ark_delegate_manager.payout_functions import send_tx
 from decouple import config as conf
+import ark_delegate_manager.models
+import console.models
+import time
+
 
 
 class UpdateVotePool(CronJobBase):
@@ -58,42 +62,40 @@ class UpdateVotePool(CronJobBase):
 
 
 class RunPayments(CronJobBase):
-    RUN_EVERY_MINS = 360
+
+    if settings.DEBUG:
+        RUN_EVERY_MINS = 1
+    elif not settings.DEBUG:
+        RUN_EVERY_MINS = 360
+
     schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
     code = 'ark_delegate_manager.run_payments'
 
     def do(self):
+
         '''
         calculate and run weekly payouts
         '''
+
         try:
-            logger.critical('starting payment run')
-
-            # if we are in test mode we don't care about our node status
-            if not ark_node.Node.check_node(51) and settings.DEBUG == False:
-                logger.fatal('Node is more than 51 blocks behind')
-                return
-
-            ark_node.set_connection(
-                host=config.CONNECTION['HOST'],
-                database=config.CONNECTION['DATABASE'],
-                user=config.CONNECTION['USER'],
-                password=config.CONNECTION['PASSWORD']
-            )
-
-            ark_node.set_delegate(
-                address=config.DELEGATE['ADDRESS'],
-                pubkey=config.DELEGATE['PUBKEY'],
-            )
-
-            payouts, timestamp = ark_node.Delegate.trueshare()
-            logger.info('starting payment run at arktimestamp: {}'.format(timestamp))
-            payout_functions.paymentrun(
-                payout_dict=payouts,
-                current_timestamp=timestamp
-            )
+            payout_functions.set_lock_payment_run()
         except Exception:
-            logger.exception('error in RunPayments')
+            logger.fatal('failed to set lock')
+            raise payout_functions.LockError
+
+        try:
+            if settings.DEBUG:
+                logger.info('faking payment run')
+                time.sleep(120)
+            elif not settings.DEBUG:
+                payout_functions.payment_run()
+        except Exception:
+            logger.exception('failed payment run')
+
+        try:
+            payout_functions.release_lock_payment_run()
+        except Exception:
+            logger.exception('failed to clear payment_run_lock')
 
 
 class VerifyReceivingArkAddresses(CronJobBase):
