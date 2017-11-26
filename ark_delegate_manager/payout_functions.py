@@ -129,12 +129,12 @@ def set_lock_payment_run(name):
     try:
         lock = ark_delegate_manager.models.CronLock.objects.select_for_update().filter(job_name=name, lock=False).update(lock=True)
         if not lock:
-            logger.fatal('payment lock was True while payment run was initiated.')
+            logger.fatal('{} lock was True while run was initiated.'.format(name))
             raise ConcurrencyError
         if settings.DEBUG:
             print('set lock correctly')
     except ObjectDoesNotExist:
-        logger.fatal('payment lock was True while payment run was initiated.')
+        logger.fatal('{} lock was True while run was initiated.'.format(name))
         raise ConcurrencyError
 
 
@@ -142,7 +142,7 @@ def set_lock_payment_run(name):
 def release_lock_payment_run(name):
     lock = ark_delegate_manager.models.CronLock.objects.select_for_update().filter(job_name=name, lock=True).update(lock=False)
     if not lock:
-        logger.fatal('payment lock was False while payment run was Ended.')
+        logger.fatal('{} lock was False while run was ended.'.format(name))
         raise ConcurrencyError
 
 
