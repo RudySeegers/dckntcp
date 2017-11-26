@@ -168,7 +168,7 @@ def payment_run():
     payouts, current_timestamp = ark_node.Delegate.trueshare()
 
     for voter in payouts:
-        send_destination = ark_delegate_manager.models.PayoutTable.objects.get_or_create(address=voter)
+        send_destination = ark_delegate_manager.models.PayoutTable.objects.get_or_create(address=voter)[0]
         send_destination.amount = payouts[voter]['share']
         send_destination.vote_timestamp = payouts[voter]['vote_timestamp']
         send_destination.status = payouts[voter]['status']
