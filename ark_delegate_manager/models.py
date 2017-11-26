@@ -34,7 +34,7 @@ class DutchDelegateStatus(models.Model):
     ark_votes = models.FloatField(default=0)
     voters = models.IntegerField(default=0)
     productivity = models.FloatField(default=100)
-    reward = models.IntegerField(default=0)
+    reward = models.BigIntegerField(default=0)
 
 
 class EarlyAdopterAddressException(models.Model):
