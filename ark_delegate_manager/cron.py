@@ -93,7 +93,8 @@ class RunPayments(CronJobBase):
             logger.exception('failed payment run')
 
         # this sleep ensures the ark-node has time to receive the new transactions
-        time.sleep(constants.HOUR)
+        if not settings.DEBUG:
+            time.sleep(constants.HOUR)
         try:
             payout_functions.release_lock_payment_run()
         except Exception:
