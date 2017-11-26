@@ -80,7 +80,7 @@ class RunPayments(CronJobBase):
         try:
             payout_functions.set_lock_payment_run()
         except Exception:
-            logger.fatal('failed to set lock')
+            logger.exception('failed to set lock')
             raise payout_functions.LockError
 
         try:
