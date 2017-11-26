@@ -68,7 +68,7 @@ class Node(models.Model):
 
 
 class CronLock(models.Model):
-    job_name = models.CharField(blank=True, max_length=10, unique=True)
+    job_name = models.CharField(blank=True, max_length=100, unique=True)
     lock = models.BooleanField(default=False)
 
 
