@@ -134,8 +134,8 @@ def set_lock_payment_run(name):
         if settings.DEBUG:
             print('set lock correctly')
     except ObjectDoesNotExist:
-        logger.fatal('{} lock was True while run was initiated.'.format(name))
-        raise ConcurrencyError
+        logger.fatal('Cannot find lock, make sure to load fixtures')
+        raise
 
 
 @transaction.atomic
@@ -196,6 +196,9 @@ def payment_run():
         last_payout = send_destination.last_payout_blockchain_side
         last_payout_server_side = send_destination.last_payout_server_side
 
+        if address in blacklist:
+            continue
+
         if current_timestamp < last_payout_server_side:
             logger.fatal('double payment run occuring')
             raise ConcurrencyError('double payment run occuring, lock needs to be manually removed')
@@ -203,9 +206,6 @@ def payment_run():
         if current_timestamp - last_payout_server_side < 15 * constants.HOUR:
             logger.fatal('Time between payouts less than 15 hours according to server.')
             raise ConcurrencyError('double payment run occuring, lock needs to be manually removed')
-
-        if address in blacklist:
-            continue
 
         share_percentage = 0.95
         frequency = 2
@@ -274,3 +274,4 @@ def payment_run():
                                                                                 failed_transactions))
         logger.critical('amout successful: {0}, failed amount: {1}'.format(succesful_amount / info.ARK,
                                                                            failed_amount / info.ARK))
+    return True
