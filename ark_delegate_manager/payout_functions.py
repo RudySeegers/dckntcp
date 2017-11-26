@@ -169,10 +169,10 @@ def payment_run():
 
     for voter in payouts:
         send_destination = ark_delegate_manager.models.PayoutTable.objects.get_or_create(address=voter)
-        send_destination.amount = voter['share']
-        send_destination.vote_timestamp = voter['vote_timestamp']
-        send_destination.status = voter['status']
-        send_destination.last_payout_blockchain_side = voter['last_payout']
+        send_destination.amount = payouts[voter]['share']
+        send_destination.vote_timestamp = payouts[voter]['vote_timestamp']
+        send_destination.status = payouts[voter]['status']
+        send_destination.last_payout_blockchain_side = payouts[voter]['last_payout']
         send_destination.save()
 
     # and now on to actually sending the payouts
