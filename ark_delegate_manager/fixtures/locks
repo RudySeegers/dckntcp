@@ -1,0 +1,40 @@
+- model: ark_delegate_manager.CronLock
+  pk: 1
+  fields:
+    job_name: RunPayments
+    lock: False
+- model: ark_delegate_manager.CronLock
+  pk: 2
+  fields:
+    job_name: UpdateVotePool
+    lock: False
+- model: ark_delegate_manager.CronLock
+  pk: 3
+  fields:
+    job_name: VerifyReceivingArkAddresses
+    lock: False
+- model: ark_delegate_manager.CronLock
+  pk: 4
+  fields:
+    job_name: UpdateDutchDelegateStatus
+    lock: False
+- model: ark_delegate_manager.CronLock
+  pk: 5
+  fields:
+    job_name: UpdateDelegates
+    lock: False
+- model: ark_delegate_manager.CronLock
+  pk: 6
+  fields:
+    job_name: GetBlockchainHeight
+    lock: False
+- model: ark_delegate_manager.CronLock
+  pk: 7
+  fields:
+    job_name: PayRewardsWallet
+    lock: False
+- model: ark_delegate_manager.CronLock
+  pk: 8
+  fields:
+    job_name: UpdateDelegatesBlockchain
+    lock: False
