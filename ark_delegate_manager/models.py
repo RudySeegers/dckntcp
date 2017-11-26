@@ -78,7 +78,7 @@ class CronLock(models.Model):
 class PayoutTable(models.Model):
     address = RegexValidator(r'A[0-9a-zA-Z]{33}$', 'Only valid address formats are allowed.')
     address = models.CharField(max_length=34, blank=True, validators=[address], unique=True)
-    amount = models.IntegerField(default=0)
+    amount = models.BigIntegerField(default=0)
     last_payout_blockchain_side = models.IntegerField(default=0)
     vote_timestamp = models.IntegerField(default=0)
     status = models.BooleanField(default=False)
