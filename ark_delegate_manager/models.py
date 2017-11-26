@@ -71,6 +71,9 @@ class CronLock(models.Model):
     job_name = models.CharField(blank=True, max_length=100, unique=True)
     lock = models.BooleanField(default=False)
 
+    def __str__(self):
+        return self.job_name
+
 
 class PayoutTable(models.Model):
     address = RegexValidator(r'A[0-9a-zA-Z]{33}$', 'Only valid address formats are allowed.')
