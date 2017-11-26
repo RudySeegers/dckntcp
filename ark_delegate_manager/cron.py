@@ -76,7 +76,7 @@ class RunPayments(CronJobBase):
         '''
         calculate and run weekly payouts
         '''
-
+        logger.critical('Starting Payment Run')
         try:
             payout_functions.set_lock_payment_run()
         except Exception:
