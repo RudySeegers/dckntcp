@@ -161,7 +161,7 @@ def payout_report(request, ark_address):
     context.update(res)
     try:
         voter = ark_delegate_manager.models.VotePool.objects.get(ark_address=ark_address)
-        builduppayout = voter.payout_amount
+        builduppayout = voter.payout_amount/arkinfo.ARK
         context.update({'builduppayout': builduppayout})
     except django_exceptions.ObjectDoesNotExist:
         context.update({'error': True})
@@ -181,6 +181,7 @@ def payout_report(request, ark_address):
 
 
     data_list = [['date', 'Payout Amount']]
+
     # converting context variables to correct units
     for i in context['payout_history']:
         i['time'] = arktool.utils.arkt_to_datetime(i['timestamp'])
@@ -198,11 +199,12 @@ def payout_report(request, ark_address):
     data = SimpleDataSource(data=data_list)
     chart = LineChart(data, options={'title': 'Payout History'})
     context.update({'chart': chart})
-
-    context['payout_history'].reverse()
-    context['balance'] = context['balance'] / arkinfo.ARK
-    context['builduppayout'] = context['builduppayout'] / arkinfo.ARK
-    context['total_stake_reward'] = context['total_stake_reward'] / arkinfo.ARK
+    try:
+        context['payout_history'].reverse()
+        context['balance'] = context['balance'] / arkinfo.ARK
+        context['total_stake_reward'] = context['total_stake_reward'] / arkinfo.ARK
+    except Exception:
+        context['info'] = True
 
     return render(request, "console/console_wallet_statistics.html", context)
 

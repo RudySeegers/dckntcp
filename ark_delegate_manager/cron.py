@@ -76,12 +76,12 @@ class RunPayments(CronJobBase):
         '''
         calculate and run weekly payouts
         '''
-        logger.critical('Starting Payment Run')
+        logger.critical('Starting Payment Run: Setting lock')
         try:
-            payout_functions.set_lock_payment_run()
+            payout_functions.set_lock_payment_run(name='RunPayments')
         except Exception:
             logger.exception('failed to set lock')
-            raise payout_functions.LockError
+            raise
 
         try:
             if settings.DEBUG:
@@ -91,14 +91,16 @@ class RunPayments(CronJobBase):
                 payout_functions.payment_run()
         except Exception:
             logger.exception('failed payment run')
+            raise
 
         # this sleep ensures the ark-node has time to receive the new transactions
         if not settings.DEBUG:
             time.sleep(constants.HOUR)
         try:
-            payout_functions.release_lock_payment_run()
+            payout_functions.release_lock_payment_run(name='RunPayments')
         except Exception:
             logger.exception('failed to clear payment_run_lock')
+            raise
 
 
 class VerifyReceivingArkAddresses(CronJobBase):

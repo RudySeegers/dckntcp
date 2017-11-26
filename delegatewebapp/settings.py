@@ -46,8 +46,8 @@ DATABASES = {
         default=config('DATABASE_URL')
     )
 }
-# Application definition
 
+# Application definition
 INSTALLED_APPS = [
     # django apps
     'django.contrib.admin',

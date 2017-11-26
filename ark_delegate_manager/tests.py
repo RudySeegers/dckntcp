@@ -1,12 +1,16 @@
-from .payout_functions import set_lock_payment_run, ConcurrencyError, release_lock_payment_run
+from ark_delegate_manager.payout_functions import set_lock_payment_run, release_lock_payment_run
 import _thread
 
 
-for i in range(100):
-    try:
-        _thread.start_new_thread(set_lock_payment_run, ("Thread-{}".format(i)))
-        print('succesfully set lock')
-    except ConcurrencyError():
-       print('failed to set lock for "Thread-{}".format(i)')
+release_lock_payment_run(name='testlock')
 
-release_lock_payment_run()
+def test_race():
+    try:
+        set_lock_payment_run(name='testlock')
+    except Exception as e:
+        print('failed to set lock: {}'.format(e))
+
+
+for i in range(5):
+        _thread.start_new_thread(test_race, ())
+release_lock_payment_run(name='testlock')

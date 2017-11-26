@@ -55,6 +55,7 @@ def gen_payout_report(wallet):
             for i in delegate_list:
                 if tx.senderId == i[1]:
                     sender_delegate = i[0]
+                    break
         except Exception:
             pass
 

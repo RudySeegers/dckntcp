@@ -67,8 +67,8 @@ class Node(models.Model):
     blockchain_height = models.IntegerField(default=0)
 
 
-class PaymentLock(models.Model):
-    id = models.CharField(default='main', primary_key=True, max_length=10)
+class CronLock(models.Model):
+    job_name = models.CharField(blank=True, max_length=10, unique=True)
     lock = models.BooleanField(default=False)
 
 
