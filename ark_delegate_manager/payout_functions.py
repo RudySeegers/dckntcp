@@ -131,7 +131,7 @@ def set_lock_payment_run():
         if not lock:
             logger.fatal('payment lock was True while payment run was initiated.')
             raise ConcurrencyError
-
+        print('set lock correctly')
     except ObjectDoesNotExist:
         logger.fatal('payment lock was True while payment run was initiated.')
         raise ConcurrencyError
@@ -141,8 +141,9 @@ def set_lock_payment_run():
 def release_lock_payment_run():
     lock = ark_delegate_manager.models.PaymentLock.objects.select_for_update().filter(id='main', lock=True).update(lock=False)
     if not lock:
-        logger.fatal('payment lock was True while payment run was initiated.')
+        logger.fatal('payment lock was False while payment run was Ended.')
         raise ConcurrencyError
+
 
 def payment_run():
     logger.critical('starting payment run')
