@@ -225,7 +225,7 @@ def payment_run():
             if frequency == 1 and last_payout < current_timestamp - (constants.DAY - 3 * constants.HOUR):
                 if amount > constants.MIN_AMOUNT_DAILY:
                     amount -= info.TX_FEE
-                    res = send_tx(address=send_destination, amount=amount, vendor_field=vendorfield)
+                    res = send_tx(address=send_destination.address, amount=amount, vendor_field=vendorfield)
                     if res:
                         delegate_share = pure_amount - amount
                         succesful_transactions += 1
@@ -239,7 +239,7 @@ def payment_run():
 
             if frequency == 2 and last_payout < current_timestamp - (constants.WEEK - 5 * constants.HOUR):
                 if amount > constants.MIN_AMOUNT_WEEKY:
-                    res = send_tx(address=send_destination, amount=amount, vendor_field=vendorfield)
+                    res = send_tx(address=send_destination.address, amount=amount, vendor_field=vendorfield)
                     if res:
                         delegate_share = pure_amount - amount
                         succesful_transactions += 1
@@ -253,7 +253,7 @@ def payment_run():
 
             if frequency == 3 and last_payout < (current_timestamp - constants.MONTH - 5 * constants.HOUR):
                 if amount > constants.MIN_AMOUNT_MONTHLY:
-                    res = send_tx(address=send_destination, amount=amount, vendor_field=vendorfield)
+                    res = send_tx(address=send_destination.address, amount=amount, vendor_field=vendorfield)
                     if res:
                         delegate_share = pure_amount - amount
                         succesful_transactions += 1
