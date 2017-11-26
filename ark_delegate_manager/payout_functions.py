@@ -265,7 +265,7 @@ def payment_run():
                         failed_transactions += 1
                         failed_amount += amount
 
-            dutchdelegate = ark_delegate_manager.models.DutchDelegateStatus.objects.get_or_create(id='main')
+            dutchdelegate = ark_delegate_manager.models.DutchDelegateStatus.objects.get_or_create(id='main')[0]
             dutchdelegate.reward += delegate_share
             dutchdelegate.save()
 
