@@ -127,16 +127,15 @@ def update_arknode():
 @transaction.atomic
 def set_lock_payment_run():
     try:
-        lock = ark_delegate_manager.models.PaymentLock.objects.select_for_update().get_or_create(id='main', lock=False).update(lock=True)
-        lock.save()
+        ark_delegate_manager.models.PaymentLock.objects.select_for_update().get(id='main', lock=False).update(lock=True).save()
     except ObjectDoesNotExist:
         logger.fatal('payment lock was True while payment run was initiated.')
+        raise ConcurrencyError
 
 
 @transaction.atomic
 def release_lock_payment_run():
-    lock = ark_delegate_manager.models.PaymentLock.objects.select_for_update().get(id='main').update(lock=False)
-    lock.save()
+    ark_delegate_manager.models.PaymentLock.objects.select_for_update().get(id='main').update(lock=False).save()
 
 
 def payment_run():
