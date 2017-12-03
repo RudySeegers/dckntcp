@@ -5,7 +5,7 @@ from django.dispatch import receiver
 from console.choices import PAYOUT_CHOICES
 from django.core.validators import RegexValidator
 from annoying.fields import AutoOneToOneField
-
+import console.custom_model_fields as custom
 
 class UserProfile(models.Model):
     SENDER_CHOICES = ((1, 'Send payout second address'), (2, 'Send payout to voting address'))
@@ -21,6 +21,7 @@ class UserProfile(models.Model):
     receiving_ark_address_verified = models.BooleanField(default=False)
 
     payout_frequency = models.IntegerField(choices=PAYOUT_CHOICES, default=2)
+    preferred_day = custom.DayOfTheWeekField(blank=True)
 
     def __str__(self):
         return self.main_ark_wallet
