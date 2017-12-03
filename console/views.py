@@ -46,6 +46,7 @@ def edit_user(request):
                                                  fields=('main_ark_tag',
                                                          'main_ark_wallet',
                                                          'payout_frequency',
+                                                         'preferred_day',
                                                          # 'receiving_ark_address',
                                                          # 'receiving_ark_address_tag',
                                                          # 'ark_send_to_second_address'
