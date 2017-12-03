@@ -11,7 +11,8 @@ import hashlib
 import arkdbtools.utils as utils
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
-
+import datetime
+from urllib3.exceptions import ReadTimeoutError
 
 
 logger = logging.getLogger(__name__)
@@ -31,22 +32,27 @@ def send_tx(address, amount, vendor_field=''):
     if settings.DEBUG:
         logger.info('TESTTRANSACTON: ADDRESS  {0}, AMOUNT: {1}'.format(address, amount / info.ARK))
         return True
+    try:
+        tx = arky.core.Transaction(
+            amount=amount,
+            recipientId=address,
+            vendorField=vendor_field
+        )
+        tx.sign(config.DELEGATE['SECRET'])
+        tx.serialize()
+        arky.api.use('ark')
+        result = arky.api.broadcast(tx)
+    except ReadTimeoutError:
+        # we'll make a single retry in case of a ReadTimeOutError. We are sending the exact same TX hash to make
+        # sure no double payouts occur
+        arky.api.use('ark')
+        result = arky.api.broadcast(tx)
 
-    tx = arky.core.Transaction(
-        amount=amount,
-        recipientId=address,
-        vendorField=vendor_field
-    )
-    tx.sign(config.DELEGATE['SECRET'])
-    tx.serialize()
-    arky.api.use('ark')
-    result = arky.api.broadcast(tx)
     if result['success']:
         logger.info('succesfull transacton for {0}, '
                     'for amount: {1}. RESPONSE: {2}'.format(address, amount/info.ARK, result))
 
         return True
-    # if after 5 attempts we still failed:
     if not result['success']:
         logger.warning('failed transaction for {0}, for amount: {1}. RESPONSE: {2}'.format(address,
                                                                                            amount/info.ARK,
@@ -181,7 +187,7 @@ def payment_run():
     succesful_transactions = 0
     succesful_amount = 0
     vendorfield = ark_delegate_manager.models.Setting.objects.get(id='main').vendorfield
-
+    weekday = datetime.datetime.today().weekday()
     payout_exceptions = ark_delegate_manager.models.EarlyAdopterAddressException.objects.all().values_list(
         'new_ark_address', flat=True)
 
@@ -196,6 +202,9 @@ def payment_run():
         last_payout = send_destination.last_payout_blockchain_side
         last_payout_server_side = send_destination.last_payout_server_side
 
+        #preferred day of 8 translated to no preference
+        preferred_day = 8
+        correctday = True
         if address in blacklist:
             continue
 
@@ -214,6 +223,7 @@ def payment_run():
         try:
             user_settings = console.models.UserProfile.objects.get(main_ark_wallet=address)
             frequency = user_settings.payout_frequency
+            preferred_day = int(user_settings.preferred_day)
         except ObjectDoesNotExist:
             pass
 
@@ -221,7 +231,12 @@ def payment_run():
             share_percentage = 0.96
 
         amount = pure_amount * share_percentage
-        if status:
+        if preferred_day == 8:
+            correctday = True
+        elif preferred_day != weekday:
+            correctday = False
+
+        if status and correctday:
             if frequency == 1 and last_payout < current_timestamp - (constants.DAY - 3 * constants.HOUR):
                 if amount > constants.MIN_AMOUNT_DAILY:
                     amount -= info.TX_FEE
