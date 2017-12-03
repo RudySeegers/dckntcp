@@ -253,6 +253,7 @@ def payment_run():
 
             if frequency == 3 and last_payout < (current_timestamp - constants.MONTH - 5 * constants.HOUR):
                 if amount > constants.MIN_AMOUNT_MONTHLY:
+                    amount += 1.5 * info.TX_FEE
                     res = send_tx(address=send_destination.address, amount=amount, vendor_field=vendorfield)
                     if res:
                         delegate_share = pure_amount - amount
