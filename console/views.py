@@ -41,42 +41,51 @@ def edit_user(request):
     # prepopulate UserProfileForm with retrieved user values from above.
     user_form = UserForm(instance=user)
 
+    ProfileInlineFormsetGeneral = inlineformset_factory(User, UserProfile,
+                                                        fields=('preferred_day',
+                                                                 'inform_by_email',
+                                                                 ))
+
+
     # The sorcery begins from here, see explanation below
-    ProfileInlineFormset = inlineformset_factory(User, UserProfile,
-                                                 fields=('main_ark_tag',
-                                                         'main_ark_wallet',
-                                                         'payout_frequency',
-                                                         'preferred_day',
+    ProfileInlineFormsetARK = inlineformset_factory(User, UserProfile,
+                                                    fields=('main_ark_tag',
+                                                            'main_ark_wallet',
+                                                            'payout_frequency',
                                                          # 'receiving_ark_address',
                                                          # 'receiving_ark_address_tag',
                                                          # 'ark_send_to_second_address'
                                                          ))
-    formset = ProfileInlineFormset(instance=user)
-    username = user
+
+    formset_ark = ProfileInlineFormsetARK(instance=user)
+    formset_general = ProfileInlineFormsetARK(instance=user)
 
     # Generate a verification token for receiving address verification
-    arktoken = gen_ark_token(username)
-    kaputoken = gen_kapu_token(username)
+    arktoken = gen_ark_token(user)
+    kaputoken = gen_kapu_token(user)
 
     if request.user.is_authenticated() and request.user.id == user.id:
         if request.method == "POST":
             user_form = UserForm(request.POST, request.FILES, instance=user)
-            formset = ProfileInlineFormset(request.POST, request.FILES, instance=user)
+            formset_general = ProfileInlineFormsetGeneral(request.POST, request.FILES, instance=user)
+            formset_ark = ProfileInlineFormsetARK(request.POST, request.FILES, instance=user)
 
             if user_form.is_valid():
                 created_user = user_form.save(commit=False)
-                formset = ProfileInlineFormset(request.POST, request.FILES, instance=created_user)
+                formset_ark = ProfileInlineFormsetARK(request.POST, request.FILES, instance=created_user)
+                formset_general = ProfileInlineFormsetGeneral(request.POST, request.FILES, instance=created_user)
 
-                if formset.is_valid():
+                if formset_ark.is_valid() and formset_general.is_valid():
 
                     created_user.save()
-                    formset.save()
+                    formset_ark.save()
                     return HttpResponseRedirect('/console/update/saved')
 
         return render(request, "console/update2.html", {
             "noodle": pk,
             "noodle_form": user_form,
-            "formset": formset,
+            "formset_ark": formset_ark,
+            "formset_general": formset_general,
             "arktoken": arktoken,
             "kaputoken": kaputoken,
         })

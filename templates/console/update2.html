@@ -34,14 +34,43 @@ function myFunction() {
     <div class="row">
     	<div class="col-md-3">
             <div class="list-group" id="sidebar" style="position: fixed">
+                <a href="#general" class="list-group-item scroll">General</a>
             	<a href="#ark" class="list-group-item scroll">ARK</a>
                 <a href="#kapu" class="list-group-item scroll">Kapu</a>
-                <a href="#oxy" class="list-group-item scroll">Oxycoin</a>
-                <a href="#shift" class="list-group-item scroll">Shift</a>
                 <a href="#tokens" class="list-group-item scroll">Verification Tokens</a>
             </div>
         </div>
         <div class="col-md-9">
+                  <div id="general">
+
+        <h2>General</h2>
+          <p>General account settings</p>
+              <div class="container">
+    <div class="row">
+        <div class="col-md-9">
+            <form action="" method="POST" class="padding">
+             {% csrf_token %}
+            {% for hidden in formset_general.hidden_fields %}
+                {{ hidden }}
+            {% endfor %}
+             {{ formset_general.management_form }}
+                {% for field in formset_general %}
+                {% for formfield in field.visible_fields %}
+                    <h4>{{ formfield.label }}</h4>
+                    {{ formfield|add_class:'form-control'}}
+                <div>&nbsp</div>
+                {% endfor %}
+                {% for hidden in field.hidden_fields %}
+                    {{ hidden }}
+                {% endfor %}
+
+                {% endfor %}
+           <button type="submit" class="btn btn-primary btn-sm left" contenteditable="false">Save</button>
+           <a class="btn btn-primary btn-sm left" contenteditable="false" href="{% url 'console_update' %}">Restore</a>
+
+            </form>
+        </div>
+
           <div id="ark">
           <h2>ARK</h2>
           <p>ARK-ecosystem wallet settings</p>
@@ -50,10 +79,10 @@ function myFunction() {
         <div class="col-md-9">
             <form action="" method="POST" class="padding">
              {% csrf_token %}
-            {% for hidden in formset.hidden_fields %}
+            {% for hidden in formset_ark.hidden_fields %}
                 {{ hidden }}
             {% endfor %}
-             {{ formset.management_form }}
+             {{ formset_ark.management_form }}
                 {% for field in formset %}
                 {% for formfield in field.visible_fields %}
                     {% if not formfield.label == 'Delete' %}
