@@ -11,6 +11,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.7/paper/bootstrap.min.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
   <link rel="stylesheet" href="{% static 'home/css/dashboard.css'%} ">
+ <link rel="stylesheet" href="{% static 'home/css/messages.css'%} ">
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
   <script async defer src="https://buttons.github.io/buttons.js"></script>
@@ -102,59 +104,21 @@ function fixBodyPadding(className) {
 
             </ul>
             </li>
-            <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="font-size: 300%">Kapu</a>
-            <ul class="dropdown-menu">
-                {% for wallet in kapuwallets %}
-                <li><a href="#">{{ wallet }}</a></li>
-                {% endfor %}
-                <li role="separator" class="divider"></li>
-                <li class="dropdown-header"></li>
-                <li><a href="{% url 'console_update' %}#kapu">{% if not kapuwallets %}
-                    add wallet
-                       {% else %}
-                    configure wallets
-                 {% endif %}
-                       </a></li>
-            </ul>
-          </li>
-{#            <li class="dropdown">#}
-{#            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="font-size: 300%">Oxycoin</a>#}
-{#            <ul class="dropdown-menu">#}
-{#              {% for wallet in oxywallets %}#}
-{#                <li><a href="#">{{ wallet }}</a></li>#}
-{#                {% endfor %}#}
-{#                <li role="separator" class="divider"></li>#}
-{#                <li class="dropdown-header"></li>#}
-{#                <li><a href="{% url 'console_update' %}#oxy">{% if not oxywallets %}#}
-{#                    add wallet#}
-{#                       {% else %}#}
-{#                    configure wallets#}
-{#                 {% endif %}#}
-{#                       </a></li>#}
-{#            </ul>#}
-{#          </li>#}
-{#            <li class="dropdown">#}
-{#            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="font-size: 300%">Shift</a>#}
-{#            <ul class="dropdown-menu">#}
-{#              {% for wallet in shiftwallets %}#}
-{#                <li><a href="#">{{ wallet }}</a></li>#}
-{#              {% endfor %}#}
-{#                <li role="separator" class="divider"></li>#}
-{#                <li class="dropdown-header"></li>#}
-{#                <li><a href="{% url 'console_update' %}#shift">{% if not shiftwallets %}#}
-{#                    add wallet#}
-{#                       {% else %}#}
-{#                    configure wallets#}
-{#                 {% endif %}#}
-{#                       </a></li>#}
-{#            </ul>#}
-{#          </li>#}
         </ul>
       </div>
     </div>
   </nav>
 {% endblock %}
+
+{% if messages %}
+        {% for message in messages %}
+    <div class="container">
+         <div class="notice notice-info">
+            <p>{{ message|safe }}</p>
+         </div>
+    </div>
+        {% endfor %}
+{% endif %}
 
 {% if not error or first%}
     {% block content %}
