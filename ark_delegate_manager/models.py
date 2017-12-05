@@ -5,6 +5,7 @@ from django.core.validators import RegexValidator
 class Setting(models.Model):
     id = models.CharField(default='main', primary_key=True, max_length=10)
     vendorfield = models.CharField(max_length=64, default='Thank you for voting.')
+    news_link = models.CharField(max_length=300, blank=True, null=True)
 
     def __str__(self):
         return self.id
