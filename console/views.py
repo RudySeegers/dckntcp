@@ -20,6 +20,7 @@ from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
 from django.shortcuts import render, redirect
+import datetime
 logger = logging.getLogger(__name__)
 
 
@@ -212,10 +213,19 @@ def payout_report(request, ark_address):
             i['time'],
             i['amount']
         ])
+
+
+
         if i['share']:
             i['share'] = str(i['share'] * 100) + '%'
         else:
             i['share'] = 'Not available'
+
+    # incase no payouts have occured yet, this will render an empty graph
+    if len(data_list) == 1:
+        data_list.append([
+            datetime.datetime.today(),
+            0])
 
     data = SimpleDataSource(data=data_list)
     chart = LineChart(data, options={'title': 'Payout History'})
