@@ -13,6 +13,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 import datetime
 from urllib3.exceptions import ReadTimeoutError
+from django.template.loader import render_to_string, get_template
 
 
 logger = logging.getLogger(__name__)
@@ -24,6 +25,31 @@ class ConcurrencyError(Exception):
 
 class LockError(Exception):
     pass
+from django.contrib.auth.models import User
+from django.core.mail import send_mail as core_send_mail
+from django.core.mail import EmailMultiAlternatives
+import threading
+
+
+class EmailThread(threading.Thread):
+    def __init__(self, subject, body, from_email, recipient_list, fail_silently, html):
+        self.subject = subject
+        self.body = body
+        self.recipient_list = recipient_list
+        self.from_email = from_email
+        self.fail_silently = fail_silently
+        self.html = html
+        threading.Thread.__init__(self)
+
+    def run (self):
+        msg = EmailMultiAlternatives(self.subject, self.body, self.from_email, self.recipient_list)
+        if self.html:
+            msg.attach_alternative(self.html, "text/html")
+        msg.send(self.fail_silently)
+
+
+def send_mail(subject, body, from_email, recipient_list, fail_silently=False, html=None, *args, **kwargs):
+    EmailThread(subject, body, from_email, recipient_list, fail_silently, html).start()
 
 
 def send_tx(address, amount, vendor_field=''):
@@ -131,21 +157,19 @@ def update_arknode():
 
 
 @transaction.atomic
-def set_lock_payment_run(name):
+def set_lock(name):
     try:
         lock = ark_delegate_manager.models.CronLock.objects.select_for_update().filter(job_name=name, lock=False).update(lock=True)
         if not lock:
             logger.fatal('{} lock was True while run was initiated.'.format(name))
             raise ConcurrencyError
-        if settings.DEBUG:
-            print('set lock correctly')
     except ObjectDoesNotExist:
         logger.fatal('Cannot find lock, make sure to load fixtures')
         raise
 
 
 @transaction.atomic
-def release_lock_payment_run(name):
+def release_lock(name):
     lock = ark_delegate_manager.models.CronLock.objects.select_for_update().filter(job_name=name, lock=True).update(lock=False)
     if not lock:
         logger.fatal('{} lock was False while run was ended.'.format(name))
@@ -219,11 +243,12 @@ def payment_run():
         share_percentage = 0.95
         frequency = 2
         delegate_share = 0
-
+        send_email = 1
         try:
             user_settings = console.models.UserProfile.objects.get(main_ark_wallet=address)
             frequency = user_settings.payout_frequency
             preferred_day = int(user_settings.preferred_day)
+            send_email = user_settings.send_email_about_payout
         except ObjectDoesNotExist:
             pass
 
@@ -242,12 +267,14 @@ def payment_run():
                     amount -= info.TX_FEE
                     res = send_tx(address=send_destination.address, amount=amount, vendor_field=vendorfield)
                     if res:
-                        delegate_share = pure_amount - amount
+                        delegate_share = pure_amount - (amount + info.TX_FEE)
                         succesful_transactions += 1
                         succesful_amount += amount
                         logger.info('sent {0} to {1}  res: {2}'.format(amount, send_destination, res))
                         send_destination.last_payout_server_side = last_payout
                         send_destination.save()
+                        user_settings.send_email_about_payout = True
+                        user_settings.save()
                     else:
                         failed_transactions += 1
                         failed_amount += amount
@@ -256,12 +283,14 @@ def payment_run():
                 if amount > constants.MIN_AMOUNT_WEEKY:
                     res = send_tx(address=send_destination.address, amount=amount, vendor_field=vendorfield)
                     if res:
-                        delegate_share = pure_amount - amount
+                        delegate_share = pure_amount - (amount + info.TX_FEE)
                         succesful_transactions += 1
                         succesful_amount += amount
                         logger.info('sent {0} to {1}  res: {2}'.format(amount, send_destination, res))
                         send_destination.last_payout_server_side = last_payout
                         send_destination.save()
+                        user_settings.send_email_about_payout = True
+                        user_settings.save()
                     else:
                         failed_transactions += 1
                         failed_amount += amount
@@ -274,9 +303,10 @@ def payment_run():
                         delegate_share = pure_amount - amount
                         succesful_transactions += 1
                         succesful_amount += amount
-                        logger.info('sent {0} to {1}  res: {2}'.format(amount, send_destination, res))
                         send_destination.last_payout_server_side = last_payout
                         send_destination.save()
+                        user_settings.send_email_about_payout = True
+                        user_settings.save()
                     else:
                         failed_transactions += 1
                         failed_amount += amount
@@ -291,3 +321,28 @@ def payment_run():
         logger.critical('amout successful: {0}, failed amount: {1}'.format(succesful_amount / info.ARK,
                                                                            failed_amount / info.ARK))
     return True
+
+@transaction.atomic()
+def inform_about_payout_run():
+    users = console.models.UserProfile.objects.all()
+    news_link = ark_delegate_manager.models.Setting.objects.get(id='main').news_link
+    for user in users:
+        if user.send_email_about_payout and user.inform_by_email:
+            recip = User.objects.get(user=user)
+            email_address = recip.email
+            name = recip.username
+            user.send_email_about_payout = False
+            user.save()
+            context = {
+                'name': name,
+                'address': user.main_ark_wallet,
+                'news_link': news_link
+            }
+            html_message = render_to_string('../templates/emails/payout_email.html', context)
+            send_mail(
+                subject='A new payout has been made.',
+                body=html_message,
+                html=html_message,
+                from_email='dutchdelegate@gmail.com',
+                recipient_list=[email_address]
+            )
