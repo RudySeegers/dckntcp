@@ -209,7 +209,7 @@ def payout_report(request, ark_address):
         i['amount'] = i['amount'] / arkinfo.ARK
 
         data_list.append([
-            i['time'].strftime('%d/%m/%Y'),
+            i['time'],
             i['amount']
         ])
         if i['share']:
