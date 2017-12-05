@@ -1,9 +1,9 @@
 from django.shortcuts import render, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from .models import UserProfile
+from console.models import UserProfile
 import ark_delegate_manager.models
-from .forms import UserForm
+from console.forms import SettingsForm
 from django.forms.models import inlineformset_factory
 from django.core.exceptions import PermissionDenied
 from graphos.renderers.gchart import LineChart
@@ -16,6 +16,10 @@ import arkdbtools.config as arkinfo
 import ark_delegate_manager.constants
 import ark_analytics.analytic_functions
 import django.core.exceptions as django_exceptions
+from django.contrib import messages
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.forms import PasswordChangeForm
+from django.shortcuts import render, redirect
 logger = logging.getLogger(__name__)
 
 
@@ -30,67 +34,74 @@ def not_saved(request):
 
 
 @login_required()
-def edit_user(request):
-    """ used to render the wallet settings page"""
+def render_settings(request):
+    """ used to render the wallet settings page, each form is validated by an individual view funtion"""
+    context = sidebar_context(request)
+
+    # request user pk
+    pk = request.user.pk
+
+    # querying the User object with pk
+    user = User.objects.get(pk=pk)
+    userprofile=UserProfile.objects.get(user=user)
+
+    # prepopulate all forms  with retrieved user values from above.
+    settingsform = SettingsForm(instance=userprofile)
+    passwordform = PasswordChangeForm(request.user)
+    # Generate a verification token for receiving address verification
+    arktoken = gen_ark_token(user)
+    if request.method == "GET":
+        context.update({
+            "error": False,
+            "formset": settingsform,
+            "passwordform": passwordform,
+            "arktoken": arktoken,
+        })
+        return render(request, "console/update2.html", context)
+
+
+@login_required(login_url='/login/')
+def save_settings(request):
+
     # request user pk
     pk = request.user.pk
 
     # querying the User object with pk
     user = User.objects.get(pk=pk)
 
-    # prepopulate UserProfileForm with retrieved user values from above.
-    user_form = UserForm(instance=user)
-
-    ProfileInlineFormsetGeneral = inlineformset_factory(User, UserProfile,
-                                                        fields=('preferred_day',
-                                                                 'inform_by_email',
-                                                                 ))
-
-
-    # The sorcery begins from here, see explanation below
-    ProfileInlineFormsetARK = inlineformset_factory(User, UserProfile,
-                                                    fields=('main_ark_tag',
-                                                            'main_ark_wallet',
-                                                            'payout_frequency',
-                                                         # 'receiving_ark_address',
-                                                         # 'receiving_ark_address_tag',
-                                                         # 'ark_send_to_second_address'
-                                                         ))
-
-    formset_ark = ProfileInlineFormsetARK(instance=user)
-    formset_general = ProfileInlineFormsetARK(instance=user)
-
-    # Generate a verification token for receiving address verification
-    arktoken = gen_ark_token(user)
-    kaputoken = gen_kapu_token(user)
-
     if request.user.is_authenticated() and request.user.id == user.id:
         if request.method == "POST":
-            user_form = UserForm(request.POST, request.FILES, instance=user)
-            formset_general = ProfileInlineFormsetGeneral(request.POST, request.FILES, instance=user)
-            formset_ark = ProfileInlineFormsetARK(request.POST, request.FILES, instance=user)
+            settings = SettingsForm(
+                data=request.POST,
+            )
 
-            if user_form.is_valid():
-                created_user = user_form.save(commit=False)
-                formset_ark = ProfileInlineFormsetARK(request.POST, request.FILES, instance=created_user)
-                formset_general = ProfileInlineFormsetGeneral(request.POST, request.FILES, instance=created_user)
+            if settings.is_valid():
+                settings_form_object = settings.save(commit=False)
+                settings_form_object.user = user
+                settings_form_object.save()
+                messages.success(request, message='Saved your changes successfully.')
+                return HttpResponseRedirect('/console/update/')
+            else:
+                error = 'Oops, something went wrong. (hint, check if your Ark address is valid.)'
+                messages.error(request, message=error)
+                return HttpResponseRedirect('/console/update/')
+        else:
+            raise PermissionDenied
 
-                if formset_ark.is_valid() and formset_general.is_valid():
 
-                    created_user.save()
-                    formset_ark.save()
-                    return HttpResponseRedirect('/console/update/saved')
-
-        return render(request, "console/update2.html", {
-            "noodle": pk,
-            "noodle_form": user_form,
-            "formset_ark": formset_ark,
-            "formset_general": formset_general,
-            "arktoken": arktoken,
-            "kaputoken": kaputoken,
-        })
-    else:
-        raise PermissionDenied
+@login_required(login_url='/login/')
+def save_account_settings(request):
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)  # Important!
+            messages.success(request, 'Your password was successfully updated!')
+            return redirect('/console/update')
+        else:
+            error = [form.error_messages[i] for i in form.error_messages]
+            messages.error(request, message=error)
+            return redirect('/console/update')
 
 
 @login_required(login_url='/login/')
@@ -213,8 +224,9 @@ def payout_report(request, ark_address):
         context['payout_history'].reverse()
         context['balance'] = context['balance'] / arkinfo.ARK
         context['total_stake_reward'] = context['total_stake_reward'] / arkinfo.ARK
+        context['error'] = False
     except Exception:
-        context['info'] = True
+        context['error'] = True
 
     return render(request, "console/console_wallet_statistics.html", context)
 
