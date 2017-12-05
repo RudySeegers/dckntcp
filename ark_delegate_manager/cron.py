@@ -186,6 +186,15 @@ class GetBlockchainHeight(CronJobBase):
         update the currenct blockchain height and save it in DB
         '''
         try:
+            ark_node.set_connection(
+                host=config.CONNECTION['HOST'],
+                database=config.CONNECTION['DATABASE'],
+                user=config.CONNECTION['USER'],
+                password=config.CONNECTION['PASSWORD']
+            )
+
+
+
             api.use('ark')
             blockchain_height = ark_node.Blockchain.height()
             node = Node.objects.get_or_create(id='main')[0]
@@ -229,6 +238,14 @@ class UpdateDelegatesBlockchain(CronJobBase):
         update the delegate database with historic delegates. This also obtains data on delegates below the top 51.
         """
         try:
+
+            ark_node.set_connection(
+                host=config.CONNECTION['HOST'],
+                database=config.CONNECTION['DATABASE'],
+                user=config.CONNECTION['USER'],
+                password=config.CONNECTION['PASSWORD']
+            )
+
             all_delegates = ark_node.Delegate.delegates()
 
             for i in all_delegates:
