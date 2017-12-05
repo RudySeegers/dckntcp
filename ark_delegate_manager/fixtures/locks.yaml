@@ -38,3 +38,8 @@
   fields:
     job_name: UpdateDelegatesBlockchain
     lock: False
+- model: ark_delegate_manager.CronLock
+  pk: 9
+  fields:
+    job_name: EmailRun
+    lock: False
