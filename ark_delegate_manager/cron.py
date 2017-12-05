@@ -8,11 +8,11 @@ import ark_delegate_manager.constants as constants
 logger = logging.getLogger(__name__)
 from django.conf import settings
 from . import config
-from . import payout_functions
+from . import custom_functions
 import ark_delegate_manager
 from arkdbtools.config import ARK
 from arky import api
-from ark_delegate_manager.payout_functions import send_tx
+from ark_delegate_manager.custom_functions import send_tx
 from decouple import config as conf
 import ark_delegate_manager.models
 import console.models
@@ -78,7 +78,7 @@ class RunPayments(CronJobBase):
         '''
         logger.critical('Starting Payment Run: Setting lock')
         try:
-            payout_functions.set_lock_payment_run(name='RunPayments')
+            custom_functions.set_lock(name='RunPayments')
         except Exception:
             logger.exception('failed to set lock')
             raise
@@ -88,16 +88,16 @@ class RunPayments(CronJobBase):
                 logger.info('faking payment run')
                 time.sleep(120)
             elif not settings.DEBUG:
-                payout_functions.payment_run()
+                custom_functions.payment_run()
         except Exception:
             logger.exception('failed payment run')
             raise
 
         # this sleep ensures the ark-node has time to receive the new transactions
         if not settings.DEBUG:
-            time.sleep(constants.HOUR)
+            time.sleep(constants.HOUR/2)
         try:
-            payout_functions.release_lock_payment_run(name='RunPayments')
+            custom_functions.release_lock(name='RunPayments')
         except Exception:
             logger.exception('failed to clear payment_run_lock')
             raise
@@ -118,7 +118,7 @@ class VerifyReceivingArkAddresses(CronJobBase):
             logger.fatal('Node is more than 51 blocks behind')
             return
         try:
-            payout_functions.verify_address_run()
+            custom_functions.verify_address_run()
         except Exception:
             logger.exception('Error during VerifyReceivingArkAddresses')
 
@@ -133,7 +133,7 @@ class UpdateDutchDelegateStatus(CronJobBase):
         update the ark-node statistics
         '''
         try:
-            payout_functions.update_arknode()
+            custom_functions.update_arknode()
         except Exception:
             logger.exception('Error during UpdateDutchDelegateStatus')
 
@@ -241,4 +241,23 @@ class UpdateDelegatesBlockchain(CronJobBase):
             logger.exception('failure in UpdateDelegatesBlockchain')
 
 
+class EmailRun(CronJobBase):
+    RUN_EVERY_MINS = 60
+    schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
+    code = 'ark_delegate_manager.EmailRun'
+    try:
+        custom_functions.set_lock(name='EmailRun')
+    except Exception:
+        logger.exception('failed to set lock')
+        raise
 
+    try:
+        custom_functions.inform_about_payout_run()
+    except Exception:
+        logger.exception('failed to send emails')
+
+    try:
+        custom_functions.release_lock(name='EmailRun')
+    except Exception:
+        logger.exception('failed to clear payment_run_lock')
+        raise
