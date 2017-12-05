@@ -213,7 +213,8 @@ CRON_CLASSES = [
     "ark_delegate_manager.cron.UpdateDutchDelegateStatus",
     "ark_delegate_manager.cron.UpdateDelegates",
     "ark_delegate_manager.cron.PayRewardsWallet",
-    "ark_delegate_manager.cron.UpdateDelegatesBlockchain"
+    "ark_delegate_manager.cron.UpdateDelegatesBlockchain",
+    "ark_delegate_manager.cron.EmailRun"
 ]
 
 MEDIA_ROOT = PROJECT_PATH + '/media/'
