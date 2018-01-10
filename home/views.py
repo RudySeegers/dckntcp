@@ -26,7 +26,7 @@ def index(request):
                "wallet": wallet
                }
 
-    return render(request, 'home/home.html', context)
+    return render(request, 'home/index.html', context)
 
 
 def signup(request):

@@ -8,6 +8,7 @@ urlpatterns = [
     url(r'^update/not_saved/$', views.not_saved, name='not_saved'),
     url(r'^payoutreport/@(?P<ark_address>[\w.@+-]+)$', views.payout_report, name='console_payout_report'),
     url(r'^balancereport/@(?P<ark_address>[\w.@+-]+)$', views.balance_report, name='console_balance_report'),
+    url(r'^roireport/@(?P<ark_address>[\w.@+-]+)$', views.roi_report, name='console_roi_report'),
 
     url(r'^arkdelegatereport/$', views.delegate_report, name='console_ark_delegate_report'),
     url(r'^save_general_settings/$', views.save_settings, name='save_general'),

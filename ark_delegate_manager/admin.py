@@ -1,10 +1,9 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import EarlyAdopterAddressException, BlacklistedAddress, Setting, CronLock, DutchDelegateStatus
+from .models import Setting, CronLock, DutchDelegateStatus, CustomAddressExceptions
 
-admin.site.register(EarlyAdopterAddressException)
-admin.site.register(BlacklistedAddress)
 admin.site.register(Setting)
 admin.site.register(CronLock)
 admin.site.register(DutchDelegateStatus)
+admin.site.register(CustomAddressExceptions)

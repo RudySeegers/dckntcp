@@ -26,7 +26,6 @@ class ConcurrencyError(Exception):
 class LockError(Exception):
     pass
 from django.contrib.auth.models import User
-from django.core.mail import send_mail as core_send_mail
 from django.core.mail import EmailMultiAlternatives
 import threading
 
@@ -53,11 +52,6 @@ def send_mail(subject, body, from_email, recipient_list, fail_silently=False, ht
 
 
 def send_tx(address, amount, vendor_field=''):
-
-    # if we are in testmode, don't actually send the transaction, but log the result:
-    if settings.DEBUG:
-        logger.info('TESTTRANSACTON: ADDRESS  {0}, AMOUNT: {1}'.format(address, amount / info.ARK))
-        return True
     try:
         tx = arky.core.Transaction(
             amount=amount,
@@ -66,24 +60,16 @@ def send_tx(address, amount, vendor_field=''):
         )
         tx.sign(config.DELEGATE['SECRET'])
         tx.serialize()
-        arky.api.use('ark')
-        result = arky.api.broadcast(tx)
+        result = arky.api.sendTx(tx=tx, url_base=settings.ARKNODE_PARAMS['IP'])
     except ReadTimeoutError:
         # we'll make a single retry in case of a ReadTimeOutError. We are sending the exact same TX hash to make
         # sure no double payouts occur
-        arky.api.use('ark')
-        result = arky.api.broadcast(tx)
+        result = arky.api.sendTx(tx=tx, url_base=settings.ARKNODE_PARAMS['IP'])
 
     if result['success']:
-        logger.info('succesfull transacton for {0}, '
-                    'for amount: {1}. RESPONSE: {2}'.format(address, amount/info.ARK, result))
-
         return True
-    if not result['success']:
-        logger.warning('failed transaction for {0}, for amount: {1}. RESPONSE: {2}'.format(address,
-                                                                                           amount/info.ARK,
-                                                                                           result))
-        return False
+    
+    return False
 
 
 def verify_address_run():
@@ -196,6 +182,7 @@ def payment_run():
         return
 
     payouts, current_timestamp = ark_node.Delegate.trueshare()
+    arky.api.use(network='ark')
 
     for voter in payouts:
         send_destination = ark_delegate_manager.models.PayoutTable.objects.get_or_create(address=voter)[0]
@@ -214,6 +201,9 @@ def payment_run():
     weekday = datetime.datetime.today().weekday()
     payout_exceptions = ark_delegate_manager.models.EarlyAdopterAddressException.objects.all().values_list(
         'new_ark_address', flat=True)
+    custom_exceptions = ark_delegate_manager.models.CustomAddressExceptions.objects.all().values_list(
+        'new_ark_address', flat=True
+    )
 
     blacklist = ark_delegate_manager.models.BlacklistedAddress.objects.all().values_list(
         'ark_address', flat=True)
@@ -225,7 +215,6 @@ def payment_run():
         status = send_destination.status
         last_payout = send_destination.last_payout_blockchain_side
         last_payout_server_side = send_destination.last_payout_server_side
-
         #preferred day of 8 translated to no preference
         preferred_day = 8
         correctday = True
@@ -243,19 +232,20 @@ def payment_run():
         share_percentage = 0.95
         frequency = 2
         delegate_share = 0
-        send_email = 1
         try:
             user_settings = console.models.UserProfile.objects.get(main_ark_wallet=address)
             frequency = user_settings.payout_frequency
             preferred_day = int(user_settings.preferred_day)
-            send_email = user_settings.send_email_about_payout
         except ObjectDoesNotExist:
             pass
 
         if vote_timestamp < constants.CUT_OFF_EARLY_ADOPTER or address in payout_exceptions:
             share_percentage = 0.96
 
+        if address in custom_exceptions:
+            share_percentage = ark_delegate_manager.models.CustomAddressExceptions.objects.get(new_ark_address=address).share
         amount = pure_amount * share_percentage
+
         if preferred_day == 8:
             correctday = True
         elif preferred_day != weekday:
@@ -267,7 +257,7 @@ def payment_run():
                     amount -= info.TX_FEE
                     res = send_tx(address=send_destination.address, amount=amount, vendor_field=vendorfield)
                     if res:
-                        delegate_share = pure_amount - (amount + info.TX_FEE)
+                        delegate_share = pure_amount - amount
                         succesful_transactions += 1
                         succesful_amount += amount
                         logger.info('sent {0} to {1}  res: {2}'.format(amount, send_destination, res))
@@ -300,7 +290,7 @@ def payment_run():
                     amount += 1.5 * info.TX_FEE
                     res = send_tx(address=send_destination.address, amount=amount, vendor_field=vendorfield)
                     if res:
-                        delegate_share = pure_amount - amount
+                        delegate_share = pure_amount - (amount + info.TX_FEE)
                         succesful_transactions += 1
                         succesful_amount += amount
                         send_destination.last_payout_server_side = last_payout

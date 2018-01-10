@@ -1,28 +1,55 @@
-{% extends 'home/popup_header.html' %}
+{% extends 'console/stripped_base.html' %}
 {% load crispy_forms_tags %}
-{% block content %}
-  <h2>Sign up</h2>
-    <div align="center">
 
-  <form method="post">
-    {% csrf_token %}
-      {% for field in form %}
-      <p>
-        {{ field.label_tag }}<br>
-          {{ field }}
+{%  block login %}
 
-        {% if field.help_text %}
-          <small style="display: none">{{ field.help_text }}</small>
-        {% endif %}
-        {% for error in field.errors %}
-          <p style="color: red">{{ error }}</p>
-        {% endfor %}
+<style>
+.top-buffer { margin-top: 200px;}
+.container {
+    margin: auto;
+    margin-left: 350px;
+    margin-top: 200px;
+}
+</style>
 
-      {% endfor %}
-<div class="btn-group-vertical" role="group" aria-label="...">
+<div class="container top-buffer">
+    <div class="row">
+        <div class="col-md-8">
+            <form action="" method="POST">
+                <div class="form-group">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                </div>
 
-    <button class='btn btn-primary btn-sm left' type="submit">Sign up</button>
-</div>
-  </form>
+                <div class="form-group">
+                    <div class="btn-group-vertical" role="group" aria-label="...">
+                        <ul style="list-style: none;">
+                            <li><p><input class='btn btn-primary btn-sm btn-block' type='submit' value='Register' /></p></li>
+                        </ul>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-2">
+            <div class="card" style="width: 20rem;">
+              <div class="card-block">
+                <h4 class="card-title">Terms of Agreement</h4>
+                <p class="card-text">
+                    A summorization of the ToA. By voting for dutchdelegate you agree to the complete version.
+                </p>
+              </div>
+              <ul>
+                <li>Dutchdelegate votepool is a collaborative investment group.</li>
+                <li>We do not offer our website or forging as a paid service.</li>
+                <li>Users are not entitled to a payout.</li>
+              </ul>
+              <div class="card-block">
+                <a href="{% url 'docs_tos' %}" class="card-link">Terms of Agreement</a>
+              </div>
+            </div>
+
+        </div>
     </div>
-{% endblock %}
+</div>
+{% endblock login%}
+

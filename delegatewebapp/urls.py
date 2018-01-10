@@ -8,6 +8,7 @@ user_resource = UserResource()
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
+    url(r'^docs/', include('documents.urls')),
     url(r'^home', include('home.urls')),
     url(r'^console/', include('console.urls')),
     url(r'^password_reset/$', auth_views.password_reset, name='password_reset'),

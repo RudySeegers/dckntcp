@@ -1,12 +1,17 @@
 from ark_analytics import config
 import arkdbtools.dbtools as arktool
-import arkdbtools.config as arkinfo
 import arkdbtools.utils as utils
 import ark_delegate_manager.models
-import console.info as info
 import logging
 
 logger = logging.getLogger(__name__)
+
+
+def get_or_none(model, *args, **kwargs):
+    try:
+        return model.objects.get(*args, **kwargs)
+    except model.DoesNotExist:
+        return None
 
 
 def gen_payout_report(wallet):
@@ -23,15 +28,15 @@ def gen_payout_report(wallet):
         pubkey=config.DELEGATE['PUBKEY'],
     )
 
-    height = arktool.Node.height()
     balance = arktool.Address.balance(wallet)
     payout_history = arktool.Address.payout(wallet)
-    delegate_list = ark_delegate_manager.models.ArkDelegates.objects.all().values_list('username', 'address')
+    delegates = ark_delegate_manager.models.ArkDelegates.objects.all()
+    height = arktool.Node.height()
 
     try:
         last_vote = arktool.Address.votes(wallet)[0]
         if last_vote.direction:
-            delegate = ark_delegate_manager.models.ArkDelegates.objects.get(pubkey=last_vote.delegate).username
+            delegate = delegates.get(pubkey=last_vote.delegate).username
             vote_timestamp = last_vote.timestamp
         else:
             delegate = None
@@ -44,47 +49,58 @@ def gen_payout_report(wallet):
     # initialize some variables
     total_reward = 0
     payout_result = []
-    share_percentage = None
-    sender_delegate = 'unknown delegate'
-    share_exceptions = ark_delegate_manager.models.EarlyAdopterAddressException.objects.all().values_list('new_ark_address', flat=True)
+    share_ratio = None
+    custom_share = None
+
+    try:
+        voter = ark_delegate_manager.models.VotePool.objects.select_related('customaddressexceptions').get(
+            ark_address=wallet)
+
+        custom_share = voter.customaddressexceptions.share_RANGE_IS_0_TO_1
+    except Exception:
+        pass
+
     for tx in payout_history:
         total_reward += tx.amount
 
         # this is a fast try, as in 99% of the cases tx.senderId is in the database
         try:
-            for i in delegate_list:
-                if tx.senderId == i[1]:
-                    sender_delegate = i[0]
-                    break
-        except Exception:
-            pass
+            delegate = delegates.get(address=tx.senderId)
+            sender_delegate = delegate.username
 
-        # this works for all delegates
-        if tx.senderId in info.PAYOUT_DICT:
-            for t in info.PAYOUT_DICT[tx.senderId]:
-                if tx.timestamp < t:
-                    share_percentage = info.PAYOUT_DICT[tx.senderId][t]
+            # if a new delegate arrives, or we haven't entered the data yet, this will lead to random errors.
+            try:
+                historic_share_percentages = delegate.share_percentages.json()
+                for x in historic_share_percentages:
+                    if tx.timestamp > x:
+                        share_ratio = historic_share_percentages[x]
+            except Exception:
+                share_ratio = 'N.A.'
+        except Exception:
+            sender_delegate = 'N.A.'
 
         # for dutchdelegate voters'
         if sender_delegate == 'dutchdelegate' and vote_timestamp:
-            for t in info.PAYOUT_DICT['AZse3vk8s3QEX1bqijFb21aSBeoF6vqLYE']:
-                if tx.timestamp < t:
-                    share_percentage = info.PAYOUT_DICT[tx.senderId][t]
-            if share_percentage == 0.95:
-                if vote_timestamp < 16247647 or tx.recipientId in share_exceptions:
-                    share_percentage = 0.96
+            if tx.timestamp < 16247647:
+                share_ratio = 1
+            elif vote_timestamp < 16247647:
+                share_ratio = 0.96
+            elif custom_share:
+                share_ratio = custom_share
+            else:
+                share_ratio = 0.95
 
         payout_result.append({
             'amount': tx.amount,
             'timestamp': tx.timestamp,
             'id': tx.id,
-            'share': share_percentage,
+            'share': share_ratio,
             'delegate': sender_delegate,
             })
 
     res.update({
         'succes': True,
-        'node_height': height,
+        'height': height,
         'wallet': wallet,
         'current_delegate': delegate,
         'last_vote_timestamp': vote_timestamp,
@@ -124,11 +140,8 @@ def gen_balance_report(wallet):
     for i in payouts:
         stake_amount += i.amount
 
-    height = arktool.Node.height()
-
     res.update({
         'success': True,
-        'node_height': height,
         'wallet': wallet,
         'total_stake_reward': stake_amount,
         'balance_over_time': balances,
@@ -141,21 +154,33 @@ def gen_roi_report(address):
     res = {}
     balance_history = arktool.Address.balance_over_time(address)
     payouts = arktool.Address.payout(address)
-
+    payout = []
     for i in payouts:
-        payout = {}
         for x in balance_history:
-            balance_at_payout = x.amount
-            if x.timestamp > payouts.timestamp:
+            if x.timestamp > i.timestamp:
+                balance_at_payout = x.amount
                 break
-        payout.update({i.timestamp: {
+        payout.append({
             'payout_amount': i.amount,
             'balance_at_payout': balance_at_payout,
             'ark_timestamp': i.timestamp,
             'date': utils.arkt_to_datetime(i.timestamp),
             'ROI': i.amount / abs((balance_at_payout - i.amount))
-        }
-})
-        res.update(payout)
+        })
+
+    res.update({'payout': payout})
+
+
+    stake_amount = 0
+    payouts = arktool.Address.payout(address)
+    for i in payouts:
+        stake_amount += i.amount
+
+    res.update({
+        'total_stake_reward': stake_amount
+    })
+
+    print(res)
+
     return res
 

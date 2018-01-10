@@ -1,25 +1,57 @@
-{% extends 'home/popup_header.html' %}
+{% extends 'console/stripped_base.html' %}
 {% load crispy_forms_tags %}
 
-{%  block content %}
+{%  block login %}
 
-<h1></h1>
+<style>
+.top-buffer { margin-top: 200px;}
+.container {
+    margin: auto;
+    margin-left: 350px;
+    margin-top: 200px;
+}
+</style>
 
+<div class="container top-buffer">
+    <div class="row">
+        <div class="col-md-3">
+            <form action="" method="POST">
+                <div class="form-group">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                </div>
 
-<div align="center">
-<form method="POST" action="">
-    {% csrf_token %}
-    {{ form.as_p }}
+                <div class="form-group">
+                    <div class="btn-group-vertical" role="group" aria-label="...">
+                        <ul style="list-style: none;">
+                            <li><p><input class='btn btn-primary btn-sm btn-block' type='submit' value='Sign In' /></p></li>
+                            <li><p><a class="btn btn-primary btn-sm btn-block" href="/signup/" role="button" >Register</a></p></li>
+                            <li><p><a class="btn btn-primary btn-sm btn-block" href="/password_reset/" role="button" >Reset Password</a></p></li>
+                        </ul>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-2">
+            <div class="card" style="width: 20rem;">
+              <div class="card-block">
+                <h4 class="card-title">Terms of Agreement</h4>
+                <p class="card-text">
+                    A summorization of the ToA. By voting for dutchdelegate you agree to the complete version.
+                </p>
+              </div>
+              <ul>
+                <li>Dutchdelegate votepool is a collaborative investment group.</li>
+                <li>We do not offer our website or forging as a paid service.</li>
+                <li>Users are not entitled to a payout.</li>
+              </ul>
+              <div class="card-block">
+                <a href="{% url 'docs_tos' %}" class="card-link">Terms of Agreement</a>
+              </div>
+            </div>
 
-<div class="btn-group-vertical" role="group" aria-label="...">
-    <ul style="list-style: none;">
-    <li><p><input class='btn btn-primary btn-sm left' type='submit' value='Sign In' /></p></li>
-   <li><p><a class="btn btn-primary btn-sm pull-right" href="/signup/" role="button" >Register</a></p></li>
-    <li><p><a class="btn btn-primary btn-sm pull-right" href="/password_reset/" role="button" >Reset Password</a></p></li>
-</ul>
+        </div>
     </div>
-
-
-</form>
 </div>
-{% endblock %}
+{% endblock login%}
+

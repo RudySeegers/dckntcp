@@ -6,6 +6,8 @@
     <ul class="nav nav-tabs">
         <li class="active"><a href="{% url 'console_payout_report' request.session.current_wallet%}">Payout Report</a></li>
         <li><a href="{% url 'console_balance_report' request.session.current_wallet%}">Balance Report</a></li>
+        <li><a href="{% url 'console_roi_report' request.session.current_wallet %}">ROI Report</a></li>
+
 {#        <li class="dropdown">#}
 {#        <a class="dropdown-toggle" data-toggle="dropdown" href="#">Analytics#}
 {#        <span class="caret"></span></a>#}
@@ -34,15 +36,19 @@
                     {{chart.as_html}}
                     {% endif %}
 
-                <div class="card card-block" style="width: 50rem;">
-                    <h3 class="card-title">
-                        {% if request.session.current_tag %}
+<br>
+                <br>
+                <div class="card">
+                 <div class="card-header">
+                    {% if request.session.current_tag %}
                             {{ request.session.current_tag }}
                         {% else  %}
                             {{ request.session.current_wallet }}
                         {% endif %}
-                    </h3>
-                    <ul style="list-style: none;">
+                  </div>
+                  <div class="card-block">
+                    <blockquote class="card-blockquote">
+                      <ul style="list-style: none;">
                     {% if request.session.current_tag %}
                     <li><span class="text-muted">{{ request.session.current_wallet }}</span></li>
                     {% endif %}
@@ -55,11 +61,12 @@
                     <li><span class="text-muted">Status: {{ status }}</span></li>
                     {% endif %}
                     <li><span class="text-muted">Delegate: {{ current_delegate }}</span></li>
-                    <li><span class="text-muted">Blockheight: {{ node_height }}</span></li>
                     </ul>
                     <a href="https://explorer.ark.io/address/{{ request.session.current_wallet }}" class="btn btn-primary">Explorer</a>
+                    </blockquote>
+                  </div>
                 </div>
-              </div>
+
                  {% if not error %}
               <div class="table-responsive container">
                 <table class="table table-fill">

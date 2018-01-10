@@ -35,6 +35,7 @@ ARKNODE_PARAMS = {
     'DATABASE': config('ARKNODE_DB'),
     'USER': config('ARKNODE_USER'),
     'PASSWORD': config('ARKNODE_PASSWORD'),
+    'IP': config('ARKNODE_IP')
 }
 
 
@@ -51,7 +52,6 @@ DATABASES = {
 INSTALLED_APPS = [
     # django apps
     'django.contrib.admin',
-    'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
@@ -69,6 +69,8 @@ INSTALLED_APPS = [
     'console',
     'api',
     'ark_delegate_manager',
+    'django.contrib.auth',
+
 ]
 
 MIDDLEWARE = [
@@ -150,7 +152,7 @@ STATICFILES_DIRS = [os.path.join(ROOT_PATH, 'static')]
 STATIC_ROOT = "/var/www/dutchdelegate.nl/static/"
 
 
-LOGIN_REDIRECT_URL = '/home'
+LOGIN_REDIRECT_URL = '/console'
 
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
@@ -218,4 +220,3 @@ CRON_CLASSES = [
 ]
 
 MEDIA_ROOT = PROJECT_PATH + '/media/'
-

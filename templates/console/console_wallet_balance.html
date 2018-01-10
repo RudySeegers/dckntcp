@@ -7,7 +7,9 @@
     <ul class="nav nav-tabs">
         <li><a href="{% url 'console_payout_report' request.session.current_wallet%}">Payout Report</a></li>
         <li class="active"><a href="{% url 'console_balance_report' request.session.current_wallet %}">Balance Report</a></li>
-{#        <li class="dropdown">#}
+        <li><a href="{% url 'console_roi_report' request.session.current_wallet %}">ROI Report</a></li>
+
+        {#        <li class="dropdown">#}
 {#        <a class="dropdown-toggle" data-toggle="dropdown" href="#">Analytics#}
 {#        <span class="caret"></span></a>#}
 {#        <ul class="dropdown-menu">#}
@@ -35,23 +37,26 @@
 
                     {{ chart.as_html }}
 
-                <div class="card card-block" style="width: 50rem;">
-                    <h3 class="card-title">
-                        {% if request.session.current_tag %}
+                    <div class="card">
+                     <div class="card-header">
+                         {% if request.session.current_tag %}
                             {{ request.session.current_tag }}
                         {% else  %}
                             {{ request.session.current_wallet }}
                         {% endif %}
-                    </h3>
-                    <ul style="list-style: none;">
+                  </div>
+                  <div class="card-block">
+                    <blockquote class="card-blockblockquote">
+                      <ul style="list-style: none;">
                     {% if request.session.current_tag %}
                     <li><span class="text-muted">{{ request.session.current_wallet }}</span></li>
                     {% endif %}
                     <li><span class="text-muted">Total staking reward: : {{ total_stake_reward }}</span></li>
                     </ul>
                     <a href="https://explorer.ark.io/address/{{ request.session.current_wallet }}" class="btn btn-primary">Explorer</a>
+                    </blockquote>
+                  </div>
                 </div>
-              </div>
               <div class="table-responsive container">
                 <table class="table table-fill">
                   <thead>

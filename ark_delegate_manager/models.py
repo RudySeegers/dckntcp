@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.validators import RegexValidator
+from django.contrib.postgres.fields import JSONField
 
 
 class Setting(models.Model):
@@ -11,19 +12,13 @@ class Setting(models.Model):
         return self.id
 
 
-class BlacklistedAddress(models.Model):
-    address = RegexValidator(r'A[0-9a-zA-Z]{33}$', 'Only valid address formats are allowed.')
-    ark_address = models.CharField(max_length=34, blank=True, default='', validators=[address], unique=True)
-    info = models.CharField(max_length=10000, blank=True, default='')
-
-    def __str__(self):
-        return self.ark_address
-
-
 class VotePool(models.Model):
     address = RegexValidator(r'A[0-9a-zA-Z]{33}$', 'Only valid address formats are allowed.')
     ark_address = models.CharField(max_length=34, blank=True, default='', validators=[address], unique=True)
     payout_amount = models.FloatField(default=0)
+    blacklisted = models.BooleanField(default=False)
+    status = models.CharField(max_length=200, default="Non-Dutchdelegate Voter")
+    share = models.IntegerField(default=0.95)
 
     def __str__(self):
         return self.ark_address
@@ -38,12 +33,16 @@ class DutchDelegateStatus(models.Model):
     reward = models.BigIntegerField(default=0)
 
 
-class EarlyAdopterAddressException(models.Model):
+class CustomAddressExceptions(models.Model):
     address = RegexValidator(r'A[0-9a-zA-Z]{33}$', 'Only valid address formats are allowed.')
     old_ark_address = models.CharField(max_length=34, blank=True, default='', validators=[address])
-    new_ark_address = models.CharField(max_length=34, blank=True, default='', validators=[address], unique=True)
+    new_ark_address = models.OneToOneField(max_length=34, blank=True, default='', validators=[address], unique=True,
+                                           to=VotePool, on_delete=models.CASCADE)
+
     email = models.EmailField(null=True, blank=True)
     info = models.CharField(max_length=10000, blank=True, default='')
+    share_RANGE_IS_0_TO_1 = models.IntegerField(default=0.96)
+    status_name = models.CharField(max_length=100, default='Early Adopter')
 
     def __str__(self):
         return self.new_ark_address
@@ -61,6 +60,10 @@ class ArkDelegates(models.Model):
     producedblocks = models.IntegerField(default=0)
     missedblocks = models.IntegerField(default=0)
     rank = models.IntegerField(default=0)
+    share_percentages = JSONField(default={999999999999999999: 'N.A.'})
+
+    def __str__(self):
+        return self.username
 
 
 class Node(models.Model):

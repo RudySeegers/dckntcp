@@ -1,16 +1,28 @@
-from ark_delegate_manager.custom_functions import set_lock, release_lock
-import _thread
 
+from arky import api, core
+import arkdbtools.config as constants
+from requests.exceptions import ReadTimeout
+from urllib3.exceptions import ReadTimeoutError
+secret = ''
 
-release_lock(name='testlock')
-
-def test_race():
+def send_tx(address, amount, vendor_field=''):
     try:
-        set_lock(name='testlock')
-    except Exception as e:
-        print('failed to set lock: {}'.format(e))
+        tx = core.Transaction(
+            amount=amount,
+            recipientId=address,
+            vendorField=vendor_field
+        )
+        tx.sign(secret)
+        tx.serialize()
+        result = api.sendTx(tx=tx, url_base='http://146.185.144.47:4001')
+    except ReadTimeoutError:
+        # we'll make a single retry in case of a ReadTimeOutError. We are sending the exact same TX hash to make
+        # sure no double payouts occur
+        result = api.sendTx(tx=tx, url_base='http://146.185.144.47:4001')
+    if result['success']:
+        return True
 
+    return False
 
-for i in range(5):
-        _thread.start_new_thread(test_race, ())
-release_lock(name='testlock')
+api.use('ark')
+send_tx(address='AJ8nGFj9CVq3i4hb2CnxBoy41bUDhShJwr', amount=constants.ARK)

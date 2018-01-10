@@ -5,7 +5,6 @@ import arkdbtools.utils as utils
 import arkdbtools.config as info
 import logging
 import ark_delegate_manager.constants as constants
-logger = logging.getLogger(__name__)
 from django.conf import settings
 from . import config
 from . import custom_functions
@@ -15,9 +14,9 @@ from arky import api
 from ark_delegate_manager.custom_functions import send_tx
 from decouple import config as conf
 import ark_delegate_manager.models
-import console.models
 import time
 
+logger = logging.getLogger(__name__)
 
 
 class UpdateVotePool(CronJobBase):
@@ -56,7 +55,16 @@ class UpdateVotePool(CronJobBase):
                 voter, created = VotePool.objects.update_or_create(
                     ark_address=address)
                 voter.payout_amount = payouts[address]['share']
+
+                if voter.status == "Non-Dutchdelegate Voter":
+                    if payouts[address]['vote_timestamp'] < constants.CUT_OFF_EARLY_ADOPTER:
+                        voter.status = "Early adopter"
+                        voter.share = 0.96
+                    else:
+                        voter.status = "Regular Voter"
+                        voter.share = 0.95
                 voter.save()
+
         except Exception:
             logger.exception('error in UpdateVotePool')
 
@@ -76,11 +84,9 @@ class RunPayments(CronJobBase):
         '''
         calculate and run weekly payouts
         '''
-        logger.critical('Starting Payment Run: Setting lock')
         try:
             custom_functions.set_lock(name='RunPayments')
         except Exception:
-            logger.exception('failed to set lock')
             raise
 
         try:

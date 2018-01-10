@@ -1,0 +1,94 @@
+{% extends 'console/stripped_base.html' %}
+
+
+{% block content %}
+<style>
+.top-buffer { margin-top: 200px;}
+.container {
+    margin: auto;
+    margin-left: 350px;
+    margin-top: 75px;
+}
+
+p {
+  text-align:justify;
+  }
+</style>
+
+<div class="container top-buffer">
+    <div class="row">
+        <div class="col-md-7">
+        <h2>Frequently Asked Questions</h2>
+
+        <h4>Here we will expand on some questions we have received.</h4>
+<br>
+        <ul style="list-style: none;">
+            <li>
+                <h5>How does the reward share frequency work?</h5>
+                <p>
+                    The standard frequency is set to weekly, meaning that after 7 days you can expect a reward share.
+                    For more information, check this <a href="https://medium.com/@Dutch_Delegate/when-to-expect-a-payout-69eeb6ca8925">blog</a>
+                </p>
+            </li>
+
+            <li>
+                <h5>Do you cover the voting and transaction fees?</h5>
+                <p>
+                    Yes we indeed cover the transaction fees for weekly and monthly payouts. If your payout is set to
+                    monthly you receive an additional bonus of two times the transaction fee.
+                </p>
+            </li>
+
+            <li>
+                <h5>If I have already voted, and then add more Ark to my wallet, will I need to vote again?</h5>
+                <p>
+                    No, once you have voted, that address is linked to the delegate.
+                    You can add or remove Ark from your address whenever you want. Our server will know and adjust accordingly.
+                </p>
+            </li>
+
+            <li>
+                <h5>Can I still obtain the early adopter status?</h5>
+                <p>
+                    If you have voted for us during the 100% payout period (from the 11th to the 24th of september)
+                    you will receive early adopter status. If you transfer your wallet to a ledger, you can send us a request
+                    to grant Early Adopter status to the new address
+                </p>
+            </li>
+
+            <li>
+                <h5>How much ark will I get when I vote for you?</h5>
+                <p>
+                    The community has developed many calculators, for example:
+                    <a href="https://docs.google.com/spreadsheets/d/1FGo3FkC3uSWXGHatPQyny2brMWjAIJsHFCR-Lhkl_m0">Dafty</a>
+                </p>
+
+                <p>
+                    The basic formula used is:
+
+                        ((‘Your ark’ / ‘Total Ark voted for delegate’)* ‘share percentage’) * 422)
+                </p>
+            </li>
+
+            <li>
+                <h5>Why does the share on the calculator differ every day?</h5>
+                <p>
+                    That has to do with the ‘Total Ark voted for delegate’. This changes every day (or even more often) when people switch votes around.
+                </p>
+            </li>
+
+            <li>
+                <h5>Is there a minimum share?</h5>
+                <p>
+                    For daily the minimum share is 2 ark, for weekly 0.1 Ark and for monthly 0.01 Ark. If your share
+                    is lower than the minimum, you will receive a share as soon it crosses the threshold
+                </p>
+            </li>
+
+        </ul>
+</div>
+</div>
+
+
+
+{% endblock %}

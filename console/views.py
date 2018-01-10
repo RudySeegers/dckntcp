@@ -4,7 +4,6 @@ from django.contrib.auth.models import User
 from console.models import UserProfile
 import ark_delegate_manager.models
 from console.forms import SettingsForm
-from django.forms.models import inlineformset_factory
 from django.core.exceptions import PermissionDenied
 from graphos.renderers.gchart import LineChart
 from graphos.sources.simple import SimpleDataSource
@@ -70,7 +69,7 @@ def save_settings(request):
     # querying the User object with pk
     user = User.objects.get(pk=pk)
 
-    if request.user.is_authenticated() and request.user.id == user.id:
+    if request.user.is_authenticated and request.user.id == user.id:
         if request.method == "POST":
             settings = SettingsForm(
                 data=request.POST,
@@ -167,9 +166,6 @@ def payout_report(request, ark_address):
     context = sidebar_context(request)
     context.update({'error': False})
 
-    payout_exceptions = ark_delegate_manager.models.EarlyAdopterAddressException.objects.all().values_list('new_ark_address', flat=True)
-    blacklist = ark_delegate_manager.models.BlacklistedAddress.objects.all().values_list('ark_address', flat=True)
-
     request.session['current_wallet'] = ark_address
 
     # check if we have a wallet tag
@@ -181,25 +177,22 @@ def payout_report(request, ark_address):
 
     res = ark_analytics.analytic_functions.gen_payout_report(ark_address)
     context.update(res)
+
     try:
         voter = ark_delegate_manager.models.VotePool.objects.get(ark_address=ark_address)
+        status = voter.status
+        if voter.blacklisted:
+            return render(request, 'console/blacklisted.html', {
+                'address': voter.address
+            })
+
         builduppayout = voter.payout_amount/arkinfo.ARK
-        context.update({'builduppayout': builduppayout})
+        context.update({
+            'builduppayout': builduppayout,
+            'status': status
+             })
     except django_exceptions.ObjectDoesNotExist:
         context.update({'error': True})
-
-    #display their dutchdelegate specific status:
-    status = None
-    if context['current_delegate'] == 'dutchdelegate':
-        status = 'Regular voter'
-        if context['last_vote_timestamp'] < ark_delegate_manager.constants.CUT_OFF_EARLY_ADOPTER \
-        or ark_address in payout_exceptions:
-            status = 'Early Adopter'
-
-        if ark_address in blacklist:
-            status = 'Blacklisted'
-
-    context.update({'status': status})
 
 
     data_list = [['date', 'Payout Amount']]
@@ -213,13 +206,8 @@ def payout_report(request, ark_address):
             i['time'],
             i['amount']
         ])
-
-
-
-        if i['share']:
+        if type(i['share']) == float or type(i['share']) == int:
             i['share'] = str(i['share'] * 100) + '%'
-        else:
-            i['share'] = 'Not available'
 
     # incase no payouts have occured yet, this will render an empty graph
     if len(data_list) == 1:
@@ -258,9 +246,6 @@ def balance_report(request, ark_address):
     context = sidebar_context(request)
     context['error'] = False
     res = ark_analytics.analytic_functions.gen_balance_report(ark_address)
-    if not len(res['balance_over_time']):
-        context['error'] = True
-
     context.update(res)
 
     # generate a chart and format balances with appropriate units
@@ -273,6 +258,12 @@ def balance_report(request, ark_address):
             i['balance']
         ])
 
+    # incase no payouts have occured yet, this will render an empty graph
+    if len(data_list) == 1:
+        data_list.append([
+            datetime.datetime.today(),
+            0])
+
     context['balance_over_time'].reverse()
     context['total_stake_reward'] = context['total_stake_reward']/arkinfo.ARK
 
@@ -284,6 +275,52 @@ def balance_report(request, ark_address):
 
     return render(request, 'console/console_wallet_balance.html', context)
 
+@login_required(login_url='/login/')
+def roi_report(request, ark_address):
+    arktool.set_connection(
+        host=config.CONNECTION['HOST'],
+        database=config.CONNECTION['DATABASE'],
+        user=config.CONNECTION['USER'],
+        password=config.CONNECTION['PASSWORD']
+    )
+
+    arktool.set_delegate(
+        address=config.DELEGATE['ADDRESS'],
+        pubkey=config.DELEGATE['PUBKEY'],
+    )
+
+    context = sidebar_context(request)
+
+    res = ark_analytics.analytic_functions.gen_roi_report(ark_address)
+    context.update(res)
+
+    data_list = [['date', 'Balance']]
+    for i in context['payout']:
+        i['ROI'] = round(100*i['ROI'], 3)
+        i['payout_amount'] /= arkinfo.ARK
+        i['balance_at_payout'] /= arkinfo.ARK
+
+
+        data_list.append([
+            i['date'].strftime('%d/%m/%Y'),
+            i['ROI']
+        ])
+
+    # incase no payouts have occured yet, this will render an empty graph
+    if len(data_list) == 1:
+        data_list.append([
+            datetime.datetime.today(),
+            0])
+
+    data = SimpleDataSource(data=data_list)
+    chart = LineChart(data, options={'title': 'Balance History'})
+    context.update({
+        'chart': chart,
+    })
+
+    context['error'] = False
+
+    return render(request, 'console/console_roi_report.html', context)
 
 @login_required(login_url='/login/')
 def delegate_report(request):

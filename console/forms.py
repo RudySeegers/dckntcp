@@ -1,6 +1,7 @@
 from django import forms
 from console.models import UserProfile
 from django.core.validators import RegexValidator
+from django.utils.translation import ugettext_lazy as _
 
 
 class SettingsForm(forms.ModelForm):
@@ -14,4 +15,10 @@ class SettingsForm(forms.ModelForm):
         model = UserProfile
         fields = ['preferred_day', 'inform_by_email', 'main_ark_wallet',
                   'main_ark_tag', 'payout_frequency']
+
+        labels = {
+            'main_ark_wallet': _('Ark address'),
+            'main_ark_tag': _('Address label'),
+
+        }
 

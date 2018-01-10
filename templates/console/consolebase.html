@@ -79,6 +79,22 @@ function fixBodyPadding(className) {
           <li><a href="{% url 'index' %}" style="font-size: 350%" >Home</a></li>
           <li><a href="{% url 'console_node' %}" style="font-size: 350%" >Nodes</a></li>
           <li class="dropdown" style="border-top: 1px solid white">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="font-size: 300%">Docs</a>
+            <ul class="dropdown-menu">
+
+                <li><a href="{% url 'docs_tos' %}"> Terms of Agreement </a></li>
+                <li><a href="{% url 'docs_prop' %}"> Delegate proposal </a></li>
+                <li><a href="{% url 'docs_faq' %}"> FAQ </a></li>
+            </ul>
+            </li>
+            <li class="dropdown" style="border-top: 1px solid white">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="font-size: 300%">The team</a>
+            <ul class="dropdown-menu">
+                <li><a href="https://blockhub.nl/team/"> Who are we </a></li>
+                <li><a href="mailto:info@blockhub.nl"> Contact </a></li>
+            </ul>
+            </li>
+          <li class="dropdown" style="border-top: 1px solid white">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="font-size: 300%">ARK</a>
             <ul class="dropdown-menu">
             {% if request.session.arkmaintag %}
@@ -108,7 +124,7 @@ function fixBodyPadding(className) {
       </div>
     </div>
   </nav>
-{% endblock %}
+{% endblock navbar%}
 
 {% if messages %}
         {% for message in messages %}
