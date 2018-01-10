@@ -36,9 +36,7 @@ class DutchDelegateStatus(models.Model):
 class CustomAddressExceptions(models.Model):
     address = RegexValidator(r'A[0-9a-zA-Z]{33}$', 'Only valid address formats are allowed.')
     old_ark_address = models.CharField(max_length=34, blank=True, default='', validators=[address])
-    new_ark_address = models.OneToOneField(max_length=34, blank=True, default='', validators=[address], unique=True,
-                                           to=VotePool, on_delete=models.CASCADE)
-
+    new_ark_address = models.CharField(max_length=34, blank=True, default='', validators=[address], unique=True,)
     email = models.EmailField(null=True, blank=True)
     info = models.CharField(max_length=10000, blank=True, default='')
     share_RANGE_IS_0_TO_1 = models.IntegerField(default=0.96)

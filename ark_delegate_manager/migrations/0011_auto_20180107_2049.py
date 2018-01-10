@@ -37,11 +37,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterField(
             model_name='customaddressexceptions',
-            name='new_ark_address',
-            field=models.OneToOneField(blank=True, default='', max_length=34, on_delete=django.db.models.deletion.CASCADE, to='ark_delegate_manager.VotePool', validators=[django.core.validators.RegexValidator('A[0-9a-zA-Z]{33}$', 'Only valid address formats are allowed.')]),
-        ),
-        migrations.AlterField(
-            model_name='customaddressexceptions',
             name='share_RANGE_IS_0_TO_1',
             field=models.IntegerField(default=0.96),
         ),
