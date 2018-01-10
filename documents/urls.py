@@ -1,5 +1,5 @@
 from django.conf.urls import url
-from . import views
+from documents import views
 
 urlpatterns = [
     url(r'^ToS/$', views.render_tos, name='docs_tos'),
