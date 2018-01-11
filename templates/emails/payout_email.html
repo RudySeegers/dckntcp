@@ -269,7 +269,7 @@
                                 <table border="0" cellpadding="0" cellspacing="0">
                                   <tbody>
                                     <tr>
-                                      <td> <a href="https://explorer.ark.io/address/{{ address }}" target="_blank">Show in explorer</a> </td>
+                                      <td> <a href="https://explorer.ark.io/tx/{{ tx_id }}" target="_blank">Show in explorer</a> </td>
                                     </tr>
                                   </tbody>
                                 </table>
@@ -278,9 +278,9 @@
                           </tbody>
                         </table>
                           {% if news_link %}
-                        <p>Also, don't forget to check out our latest blog <a href="{{ news_link }}">here</a>.</p>
+                        <p>{{ news_link }}">here</p>
                           {% endif %}
-                        <p>If you don't want to receive these emails, go to your settingstab and disable this option</p>
+                        <p>If you don't want to receive these emails, go to your settings and disable this option.</p>
                         <p>Kind regards,</p>
                         <p>Dutchdelegate</p>
 
