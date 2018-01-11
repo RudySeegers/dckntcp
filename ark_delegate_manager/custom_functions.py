@@ -67,7 +67,7 @@ def send_tx(address, amount, vendor_field=''):
         result = arky.api.sendTx(tx=tx, url_base=settings.ARKNODE_PARAMS['IP'])
 
     if result['success']:
-        return True
+        return result
     
     return False
 
@@ -256,7 +256,7 @@ def payment_run():
                 if amount > constants.MIN_AMOUNT_DAILY:
                     amount -= info.TX_FEE
                     res = send_tx(address=send_destination.address, amount=amount, vendor_field=vendorfield)
-                    if res:
+                    if res['success']:
                         delegate_share = pure_amount - amount
                         succesful_transactions += 1
                         succesful_amount += amount
@@ -264,6 +264,7 @@ def payment_run():
                         send_destination.last_payout_server_side = last_payout
                         send_destination.save()
                         user_settings.send_email_about_payout = True
+                        user_settings.tx_id = res['transactionIds']
                         user_settings.save()
                     else:
                         failed_transactions += 1
@@ -272,7 +273,7 @@ def payment_run():
             if frequency == 2 and last_payout < current_timestamp - (constants.WEEK - 5 * constants.HOUR):
                 if amount > constants.MIN_AMOUNT_WEEKY:
                     res = send_tx(address=send_destination.address, amount=amount, vendor_field=vendorfield)
-                    if res:
+                    if res['success']:
                         delegate_share = pure_amount - (amount + info.TX_FEE)
                         succesful_transactions += 1
                         succesful_amount += amount
@@ -280,6 +281,7 @@ def payment_run():
                         send_destination.last_payout_server_side = last_payout
                         send_destination.save()
                         user_settings.send_email_about_payout = True
+                        user_settings.tx_id = res['transactionIds']
                         user_settings.save()
                     else:
                         failed_transactions += 1
@@ -289,13 +291,14 @@ def payment_run():
                 if amount > constants.MIN_AMOUNT_MONTHLY:
                     amount += 1.5 * info.TX_FEE
                     res = send_tx(address=send_destination.address, amount=amount, vendor_field=vendorfield)
-                    if res:
+                    if res['success']:
                         delegate_share = pure_amount - (amount + info.TX_FEE)
                         succesful_transactions += 1
                         succesful_amount += amount
                         send_destination.last_payout_server_side = last_payout
                         send_destination.save()
                         user_settings.send_email_about_payout = True
+                        user_settings.tx_id = res['transactionIds']
                         user_settings.save()
                     else:
                         failed_transactions += 1
@@ -325,7 +328,7 @@ def inform_about_payout_run():
             user.save()
             context = {
                 'name': name,
-                'address': user.main_ark_wallet,
+                'tx_id': user.tx_id,
                 'news_link': news_link
             }
             html_message = render_to_string('../templates/emails/payout_email.html', context)

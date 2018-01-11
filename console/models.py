@@ -38,6 +38,9 @@ class UserProfile(models.Model):
     """ send_email_about_payout is set to True during a payout run if a payout is transmitted"""
     send_email_about_payout = models.BooleanField(default=False)
 
+    """ tx id to be included in the email, to find the specific transaction for users to check"""
+    tx_id = models.CharField(max_length=100, default="")
+
     def __str__(self):
         return self.main_ark_wallet
 
