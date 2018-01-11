@@ -1,0 +1,5 @@
+- model: ark_delegate_manager.Setting
+  pk: "main"
+  fields:
+    vendorfield: "Thank you for voting."
+    news_link: ""
