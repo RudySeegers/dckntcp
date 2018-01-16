@@ -276,6 +276,8 @@ def payment_run():
                     else:
                         failed_transactions += 1
                         failed_amount += amount
+                        logger.warning('failed tx {}'.format(res))
+
 
             if frequency == 2 and last_payout < current_timestamp - (constants.WEEK - 5 * constants.HOUR):
                 if amount > constants.MIN_AMOUNT_WEEKY:
@@ -293,6 +295,7 @@ def payment_run():
                     else:
                         failed_transactions += 1
                         failed_amount += amount
+                        logger.warning('failed tx {}'.format(res))
 
             if frequency == 3 and last_payout < (current_timestamp - constants.MONTH - 5 * constants.HOUR):
                 if amount > constants.MIN_AMOUNT_MONTHLY:
@@ -310,6 +313,8 @@ def payment_run():
                     else:
                         failed_transactions += 1
                         failed_amount += amount
+                        logger.warning('failed tx {}'.format(res))
+
 
             dutchdelegate = ark_delegate_manager.models.DutchDelegateStatus.objects.get_or_create(id='main')[0]
             dutchdelegate.reward += delegate_share
