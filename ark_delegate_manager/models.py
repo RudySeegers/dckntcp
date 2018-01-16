@@ -39,7 +39,7 @@ class CustomAddressExceptions(models.Model):
     new_ark_address = models.CharField(max_length=34, blank=True, default='', validators=[address], unique=True,)
     email = models.EmailField(null=True, blank=True)
     info = models.CharField(max_length=10000, blank=True, default='')
-    share_RANGE_IS_0_TO_1 = models.IntegerField(default=0.96)
+    share_RANGE_IS_0_TO_1 = models.FloatField(default=0.96)
     status_name = models.CharField(max_length=100, default='Early Adopter')
 
     def __str__(self):
