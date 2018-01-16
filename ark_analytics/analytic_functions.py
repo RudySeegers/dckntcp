@@ -53,10 +53,10 @@ def gen_payout_report(wallet):
     custom_share = None
 
     try:
-        voter = ark_delegate_manager.models.VotePool.objects.select_related('customaddressexceptions').get(
+        voter = ark_delegate_manager.models.VotePool.objects.get(
             ark_address=wallet)
 
-        custom_share = voter.customaddressexceptions.share_RANGE_IS_0_TO_1
+        custom_share = ark_delegate_manager.models.CustomAddressExceptions.objects.get(new_ark_address=wallet).share_RANGE_IS_0_TO_1
     except Exception:
         pass
 
