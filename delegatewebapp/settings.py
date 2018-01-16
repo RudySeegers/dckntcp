@@ -72,8 +72,7 @@ INSTALLED_APPS = [
     'console',
     'api',
     'ark_delegate_manager',
-    'relay_manager'
-
+    'relay_manager',
 ]
 
 MIDDLEWARE = [
@@ -219,7 +218,8 @@ CRON_CLASSES = [
     "ark_delegate_manager.cron.UpdateDelegates",
     "ark_delegate_manager.cron.PayRewardsWallet",
     "ark_delegate_manager.cron.UpdateDelegatesBlockchain",
-    "ark_delegate_manager.cron.EmailRun"
+    "ark_delegate_manager.cron.EmailRun",
+    "ark_delegate_manager.cron.CheckPeers"
 ]
 
 MEDIA_ROOT = PROJECT_PATH + '/media/'
