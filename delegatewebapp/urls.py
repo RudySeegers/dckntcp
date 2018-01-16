@@ -2,9 +2,10 @@ from django.conf.urls import include, url
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from . import views
-from api.resources import UserResource
+from api.resources import UserResource, RelayNodeResource
 
 user_resource = UserResource()
+relay_nodes_resource = RelayNodeResource()
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
@@ -21,7 +22,7 @@ urlpatterns = [
     url(r'^signup/$', views.signup, name='signup'),
     url(r'^activate/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
         views.activate, name='activate'),
-    url(r'^api/', include(user_resource.urls))
-
+    url(r'^api/', include(user_resource.urls, )),
+    url(r'^api/', include(relay_nodes_resource.urls))
 
 ]
