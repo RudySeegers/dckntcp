@@ -49,6 +49,8 @@ DATABASES = {
 }
 
 # Application definition
+# Django evaluates installed apps from index 0 to end, so the custom apps need to be at the bottom incase any override
+# base apps.
 INSTALLED_APPS = [
     # django apps
     'django.contrib.admin',
@@ -56,6 +58,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.auth',
 
     # third-party apps
     'crispy_forms',
@@ -69,7 +72,7 @@ INSTALLED_APPS = [
     'console',
     'api',
     'ark_delegate_manager',
-    'django.contrib.auth',
+    'relay_manager'
 
 ]
 
