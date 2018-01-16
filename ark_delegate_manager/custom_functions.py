@@ -67,10 +67,7 @@ def send_tx(address, amount, vendor_field=''):
         # sure no double payouts occur
         result = arky.api.sendTx(tx=tx, url_base=settings.ARKNODE_PARAMS['IP'])
 
-    if result['success']:
-        return result
-    
-    return False
+    return result
 
 
 # this function is currently not being used. Later we will implement verified accounts
