@@ -13,7 +13,10 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 import datetime
 from urllib3.exceptions import ReadTimeoutError
-from django.template.loader import render_to_string, get_template
+from django.template.loader import render_to_string
+from django.contrib.auth.models import User
+from django.core.mail import EmailMultiAlternatives
+import threading
 
 
 logger = logging.getLogger(__name__)
@@ -25,11 +28,9 @@ class ConcurrencyError(Exception):
 
 class LockError(Exception):
     pass
-from django.contrib.auth.models import User
-from django.core.mail import EmailMultiAlternatives
-import threading
 
 
+# we are threadingnc emails so we're non-blocking.
 class EmailThread(threading.Thread):
     def __init__(self, subject, body, from_email, recipient_list, fail_silently, html):
         self.subject = subject
@@ -72,6 +73,7 @@ def send_tx(address, amount, vendor_field=''):
     return False
 
 
+# this function is currently not being used. Later we will implement verified accounts
 def verify_address_run():
     ark_node.set_connection(
         host=config.CONNECTION['HOST'],
@@ -109,6 +111,7 @@ def verify_address_run():
             pass
 
 
+#updating the status of dutchdelegate in /console/
 def update_arknode():
         ark_node.set_connection(
             host=config.CONNECTION['HOST'],
@@ -147,7 +150,6 @@ def set_lock(name):
     try:
         lock = ark_delegate_manager.models.CronLock.objects.select_for_update().filter(job_name=name, lock=False).update(lock=True)
         if not lock:
-            logger.fatal('{} lock was True while run was initiated.'.format(name))
             raise ConcurrencyError
     except ObjectDoesNotExist:
         logger.fatal('Cannot find lock, make sure to load fixtures')
@@ -158,7 +160,6 @@ def set_lock(name):
 def release_lock(name):
     lock = ark_delegate_manager.models.CronLock.objects.select_for_update().filter(job_name=name, lock=True).update(lock=False)
     if not lock:
-        logger.fatal('{} lock was False while run was ended.'.format(name))
         raise ConcurrencyError
 
 
@@ -182,14 +183,43 @@ def payment_run():
         return
 
     payouts, current_timestamp = ark_node.Delegate.trueshare()
+
     arky.api.use(network='ark')
 
+    custom_exceptions = ark_delegate_manager.models.CustomAddressExceptions.objects.all()
+
     for voter in payouts:
+        share = 0.95
+        preferred_day = 8
+        frequency = 2
+        vote_timestamp = payouts[voter]['vote_timestamp']
+
+        # this was part of our Early Adopter bonus, where early voters permanently received a 96% share
+        if vote_timestamp < constants.CUT_OFF_EARLY_ADOPTER:
+            share = 0.96
+
+        try:
+            # we can also designate a custom share
+            share = custom_exceptions.get(new_ark_address=voter).share_RANGE_IS_0_TO_1
+
+            # a share if 0 means they are blacklisted, so we continue to the next voter
+            if share == 0:
+                continue
+
+            user_settings = console.models.UserProfile.objects.get(main_ark_wallet=voter)
+            frequency = user_settings.payout_frequency
+            preferred_day = int(user_settings.preferred_day)
+        except Exception:
+            pass
+
         send_destination = ark_delegate_manager.models.PayoutTable.objects.get_or_create(address=voter)[0]
         send_destination.amount = payouts[voter]['share']
-        send_destination.vote_timestamp = payouts[voter]['vote_timestamp']
+        send_destination.vote_timestamp = vote_timestamp
         send_destination.status = payouts[voter]['status']
         send_destination.last_payout_blockchain_side = payouts[voter]['last_payout']
+        send_destination.share = share
+        send_destination.preferred_day = preferred_day
+        send_destination.frequency = frequency
         send_destination.save()
 
     # and now on to actually sending the payouts
@@ -199,27 +229,20 @@ def payment_run():
     succesful_amount = 0
     vendorfield = ark_delegate_manager.models.Setting.objects.get(id='main').vendorfield
     weekday = datetime.datetime.today().weekday()
-    payout_exceptions = ark_delegate_manager.models.EarlyAdopterAddressException.objects.all().values_list(
-        'new_ark_address', flat=True)
-    custom_exceptions = ark_delegate_manager.models.CustomAddressExceptions.objects.all().values_list(
-        'new_ark_address', flat=True
-    )
 
-    blacklist = ark_delegate_manager.models.BlacklistedAddress.objects.all().values_list(
-        'ark_address', flat=True)
-
+    # we now iterate over the previously generated table.
     for send_destination in ark_delegate_manager.models.PayoutTable.objects.all():
         address = send_destination.address
+        share_ratio = send_destination.share
         pure_amount = send_destination.amount
-        vote_timestamp = send_destination.vote_timestamp
+        frequency = send_destination.frequency
         status = send_destination.status
         last_payout = send_destination.last_payout_blockchain_side
         last_payout_server_side = send_destination.last_payout_server_side
+
         #preferred day of 8 translated to no preference
         preferred_day = 8
         correctday = True
-        if address in blacklist:
-            continue
 
         if current_timestamp < last_payout_server_side:
             logger.fatal('double payment run occuring')
@@ -229,33 +252,20 @@ def payment_run():
             logger.fatal('Time between payouts less than 15 hours according to server.')
             raise ConcurrencyError('double payment run occuring, lock needs to be manually removed')
 
-        share_percentage = 0.95
-        frequency = 2
-        delegate_share = 0
-        try:
-            user_settings = console.models.UserProfile.objects.get(main_ark_wallet=address)
-            frequency = user_settings.payout_frequency
-            preferred_day = int(user_settings.preferred_day)
-        except ObjectDoesNotExist:
-            pass
-
-        if vote_timestamp < constants.CUT_OFF_EARLY_ADOPTER or address in payout_exceptions:
-            share_percentage = 0.96
-
-        if address in custom_exceptions:
-            share_percentage = ark_delegate_manager.models.CustomAddressExceptions.objects.get(new_ark_address=address).share
-        amount = pure_amount * share_percentage
-
+        # preferred day of 8
         if preferred_day == 8:
             correctday = True
         elif preferred_day != weekday:
             correctday = False
 
+        delegate_share = 0
+        amount = pure_amount * share_ratio
+
         if status and correctday:
             if frequency == 1 and last_payout < current_timestamp - (constants.DAY - 3 * constants.HOUR):
                 if amount > constants.MIN_AMOUNT_DAILY:
                     amount -= info.TX_FEE
-                    res = send_tx(address=send_destination.address, amount=amount, vendor_field=vendorfield)
+                    res = send_tx(address=address, amount=amount, vendor_field=vendorfield)
                     if res['success']:
                         delegate_share = pure_amount - amount
                         succesful_transactions += 1
@@ -272,7 +282,7 @@ def payment_run():
 
             if frequency == 2 and last_payout < current_timestamp - (constants.WEEK - 5 * constants.HOUR):
                 if amount > constants.MIN_AMOUNT_WEEKY:
-                    res = send_tx(address=send_destination.address, amount=amount, vendor_field=vendorfield)
+                    res = send_tx(address=address, amount=amount, vendor_field=vendorfield)
                     if res['success']:
                         delegate_share = pure_amount - (amount + info.TX_FEE)
                         succesful_transactions += 1
@@ -290,7 +300,7 @@ def payment_run():
             if frequency == 3 and last_payout < (current_timestamp - constants.MONTH - 5 * constants.HOUR):
                 if amount > constants.MIN_AMOUNT_MONTHLY:
                     amount += 1.5 * info.TX_FEE
-                    res = send_tx(address=send_destination.address, amount=amount, vendor_field=vendorfield)
+                    res = send_tx(address=address, amount=amount, vendor_field=vendorfield)
                     if res['success']:
                         delegate_share = pure_amount - (amount + info.TX_FEE)
                         succesful_transactions += 1
@@ -314,6 +324,7 @@ def payment_run():
         logger.critical('amout successful: {0}, failed amount: {1}'.format(succesful_amount / info.ARK,
                                                                            failed_amount / info.ARK))
     return True
+
 
 @transaction.atomic()
 def inform_about_payout_run():

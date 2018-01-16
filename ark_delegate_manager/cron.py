@@ -23,7 +23,6 @@ class UpdateVotePool(CronJobBase):
     RUN_EVERY_MINS = 15
     schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
     code = 'ark_delegate_manager.update_vote_pool'
-    logger.info('updating votepool')
 
     def do(self):
         '''
@@ -71,10 +70,7 @@ class UpdateVotePool(CronJobBase):
 
 class RunPayments(CronJobBase):
 
-    if settings.DEBUG:
-        RUN_EVERY_MINS = 1
-    elif not settings.DEBUG:
-        RUN_EVERY_MINS = 360
+    RUN_EVERY_MINS = 360
 
     schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
     code = 'ark_delegate_manager.run_payments'

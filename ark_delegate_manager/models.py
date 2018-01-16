@@ -85,3 +85,6 @@ class PayoutTable(models.Model):
     vote_timestamp = models.IntegerField(default=0)
     status = models.BooleanField(default=False)
     last_payout_server_side = models.IntegerField(default=0)
+    share = models.FloatField(default=0.95)
+    preferred_day = models.IntegerField(default=8)
+    frequency = models.IntegerField(default=2)
