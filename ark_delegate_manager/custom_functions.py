@@ -67,6 +67,7 @@ def send_tx(address, amount, vendor_field=''):
         # sure no double payouts occur
         result = arky.api.sendTx(tx=tx, url_base=settings.ARKNODE_PARAMS['IP'])
 
+    print(result)
     return result
 
 
