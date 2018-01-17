@@ -67,7 +67,9 @@ def send_tx(address, amount, vendor_field=''):
         # sure no double payouts occur
         result = arky.api.sendTx(tx=tx, url_base=settings.ARKNODE_PARAMS['IP'])
 
+    # print is here in case a manual payment run is performed, to see results.
     print(result)
+
     return result
 
 
@@ -272,7 +274,7 @@ def payment_run():
                         send_destination.last_payout_server_side = last_payout
                         send_destination.save()
                         user_settings.send_email_about_payout = True
-                        user_settings.tx_id = res['transactionIds']
+                        user_settings.tx_id = res['transactionIds'][0]
                         user_settings.save()
                     else:
                         failed_transactions += 1
@@ -291,7 +293,7 @@ def payment_run():
                         send_destination.last_payout_server_side = last_payout
                         send_destination.save()
                         user_settings.send_email_about_payout = True
-                        user_settings.tx_id = res['transactionIds']
+                        user_settings.tx_id = res['transactionIds'][0]
                         user_settings.save()
                     else:
                         failed_transactions += 1
@@ -309,7 +311,7 @@ def payment_run():
                         send_destination.last_payout_server_side = last_payout
                         send_destination.save()
                         user_settings.send_email_about_payout = True
-                        user_settings.tx_id = res['transactionIds']
+                        user_settings.tx_id = res['transactionIds'][0]
                         user_settings.save()
                     else:
                         failed_transactions += 1
