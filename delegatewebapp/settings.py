@@ -170,8 +170,8 @@ LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'root': {
-        'level': 'WARNING',
-        'handlers': ['sentry'],
+        'level': 'INFO',
+        'handlers': ['console'],
     },
     'formatters': {
         'verbose': {
@@ -198,13 +198,13 @@ LOGGING = {
             'propagate': True,
         },
         'raven': {
-            'level': 'DEBUG',
+            'level': 'ERROR',
             'handlers': ['console'],
             'propagate': True,
         },
         'sentry.errors': {
-            'level': 'DEBUG',
-            'handlers': ['console'],
+            'level': 'ERROR',
+            'handlers': ['sentry'],
             'propagate': True,
         },
     },
@@ -213,13 +213,11 @@ LOGGING = {
 CRON_CLASSES = [
     "ark_delegate_manager.cron.UpdateVotePool",
     "ark_delegate_manager.cron.RunPayments",
-    # "ark_delegate_manager.cron.VerifyReceivingArkAddresses",
     "ark_delegate_manager.cron.UpdateDutchDelegateStatus",
     "ark_delegate_manager.cron.UpdateDelegates",
     "ark_delegate_manager.cron.PayRewardsWallet",
     "ark_delegate_manager.cron.UpdateDelegatesBlockchain",
-    "ark_delegate_manager.cron.EmailRun",
-    "ark_delegate_manager.cron.CheckPeers"
+    "relay_manager.cron.CheckPeers"
 ]
 
 MEDIA_ROOT = PROJECT_PATH + '/media/'

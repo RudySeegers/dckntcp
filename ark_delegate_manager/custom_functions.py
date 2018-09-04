@@ -17,7 +17,7 @@ from django.template.loader import render_to_string
 from django.contrib.auth.models import User
 from django.core.mail import EmailMultiAlternatives
 import threading
-
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -28,28 +28,6 @@ class ConcurrencyError(Exception):
 
 class LockError(Exception):
     pass
-
-
-# we are threadingnc emails so we're non-blocking.
-class EmailThread(threading.Thread):
-    def __init__(self, subject, body, from_email, recipient_list, fail_silently, html):
-        self.subject = subject
-        self.body = body
-        self.recipient_list = recipient_list
-        self.from_email = from_email
-        self.fail_silently = fail_silently
-        self.html = html
-        threading.Thread.__init__(self)
-
-    def run (self):
-        msg = EmailMultiAlternatives(self.subject, self.body, self.from_email, self.recipient_list)
-        if self.html:
-            msg.attach_alternative(self.html, "text/html")
-        msg.send(self.fail_silently)
-
-
-def send_mail(subject, body, from_email, recipient_list, fail_silently=False, html=None, *args, **kwargs):
-    EmailThread(subject, body, from_email, recipient_list, fail_silently, html).start()
 
 
 def send_tx(address, amount, vendor_field=''):
@@ -200,8 +178,10 @@ def payment_run():
 
         try:
             # we can also designate a custom share
-            share = custom_exceptions.get(new_ark_address=voter).share_RANGE_IS_0_TO_1
-
+            try:
+                share = custom_exceptions.get(new_ark_address=voter).share_RANGE_IS_0_TO_1
+            except Exception:
+                pass
             # a share if 0 means they are blacklisted, so we continue to the next voter
             if share == 0:
                 continue
@@ -232,6 +212,9 @@ def payment_run():
 
     # we now iterate over the previously generated table.
     for send_destination in ark_delegate_manager.models.PayoutTable.objects.all():
+
+        time.sleep(0.5)
+
         address = send_destination.address
         share_ratio = send_destination.share
         pure_amount = send_destination.amount
@@ -329,29 +312,3 @@ def payment_run():
         logger.critical('amout successful: {0}, failed amount: {1}'.format(succesful_amount / info.ARK,
                                                                            failed_amount / info.ARK))
     return True
-
-
-@transaction.atomic()
-def inform_about_payout_run():
-    users = console.models.UserProfile.objects.all()
-    news_link = ark_delegate_manager.models.Setting.objects.get(id='main').news_link
-    for user in users:
-        if user.send_email_about_payout and user.inform_by_email:
-            recip = User.objects.get(user=user)
-            email_address = recip.email
-            name = recip.username
-            user.send_email_about_payout = False
-            user.save()
-            context = {
-                'name': name,
-                'tx_id': user.tx_id,
-                'news_link': news_link
-            }
-            html_message = render_to_string('../templates/emails/payout_email.html', context)
-            send_mail(
-                subject='A new payout has been made.',
-                body=html_message,
-                html=html_message,
-                from_email='dutchdelegate@gmail.com',
-                recipient_list=[email_address]
-            )

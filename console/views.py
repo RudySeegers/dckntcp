@@ -185,6 +185,11 @@ def payout_report(request, ark_address):
             return render(request, 'console/blacklisted.html', {
                 'address': voter.address
             })
+        try:
+            status = ark_delegate_manager.models.CustomAddressExceptions.objects.get(new_ark_address=ark_address).status_name
+        except Exception:
+            logger.exception('oops')
+            pass
 
         builduppayout = voter.payout_amount/arkinfo.ARK
         context.update({

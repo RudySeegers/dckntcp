@@ -53,15 +53,18 @@ class UpdateVotePool(CronJobBase):
             for address in payouts:
                 voter, created = VotePool.objects.update_or_create(
                     ark_address=address)
-                voter.payout_amount = payouts[address]['share']
 
                 if voter.status == "Non-Dutchdelegate Voter":
-                    if payouts[address]['vote_timestamp'] < constants.CUT_OFF_EARLY_ADOPTER:
-                        voter.status = "Early adopter"
-                        voter.share = 0.96
-                    else:
-                        voter.status = "Regular Voter"
-                        voter.share = 0.95
+                    continue
+
+                if payouts[address]['vote_timestamp'] < constants.CUT_OFF_EARLY_ADOPTER:
+                    voter.status = "Early adopter"
+                    voter.share = 0.96
+                else:
+                    voter.status = "Regular Voter"
+                    voter.share = 0.95
+                
+                voter.payout_amount = (payouts[address]['share'] * voter.share)
                 voter.save()
 
         except Exception:
@@ -258,25 +261,3 @@ class UpdateDelegatesBlockchain(CronJobBase):
                     delegate.save()
         except Exception:
             logger.exception('failure in UpdateDelegatesBlockchain')
-
-
-class EmailRun(CronJobBase):
-    RUN_EVERY_MINS = 60
-    schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
-    code = 'ark_delegate_manager.EmailRun'
-    try:
-        custom_functions.set_lock(name='EmailRun')
-    except Exception:
-        logger.exception('failed to set lock')
-        raise
-
-    try:
-        custom_functions.inform_about_payout_run()
-    except Exception:
-        logger.exception('failed to send emails')
-
-    try:
-        custom_functions.release_lock(name='EmailRun')
-    except Exception:
-        logger.exception('failed to clear payment_run_lock')
-        raise
