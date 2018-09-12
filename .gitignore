@@ -103,3 +103,7 @@ venv.bak/
 # mypy
 .mypy_cache/
 /db.sqlite3
+
+
+#Ruud
+test.txt
